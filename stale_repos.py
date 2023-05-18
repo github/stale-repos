@@ -1,0 +1,62 @@
+#!/usr/bin/env python
+
+import os
+from datetime import datetime, timezone
+from os.path import dirname, join
+
+import github3
+from dotenv import load_dotenv
+
+
+def main():
+    """
+    Iterate over all repositories in the specified organization on GitHub,
+    calculate the number of days since each repository was last pushed to,
+    and print out the URL of any repository that has been inactive for more
+    days than the specified threshold.
+
+    The following environment variables must be set:
+    - GH_TOKEN: a personal access token for the GitHub API
+    - INACTIVE_DAYS: the number of days after which a repository is considered stale
+    - ORGANIZATION: the name of the organization to search for repositories in
+
+    If GH_ENTERPRISE_URL is set, the script will authenticate to a GitHub Enterprise
+    instance instead of GitHub.com.
+    """
+    # Load env variables from file
+    dotenv_path = join(dirname(__file__), ".env")
+    load_dotenv(dotenv_path)
+
+    # Auth to GitHub.com
+    ghe = os.getenv("GH_ENTERPRISE_URL", default="").strip()
+    token = os.getenv("GH_TOKEN")
+    if ghe and token:
+        gh = github3.github.GitHubEnterprise(ghe, token=token)
+    elif token:
+        gh = github3.login(token=os.getenv("GH_TOKEN"))
+    else:
+        raise ValueError("GH_TOKEN environment variable not set")
+
+    # Set the topic
+    inactive_days_threshold = os.getenv("INACTIVE_DAYS")
+    if not inactive_days_threshold:
+        raise ValueError("INACTIVE_DAYS environment variable not set")
+
+    # Set the organization
+    organization = os.getenv("ORGANIZATION")
+    if not organization:
+        raise ValueError("ORGANIZATION environment variable not set")
+
+    # Iterate over repos in the org, acquire inactive days,
+    # and print out the repo url and days inactive if it's over the threshold (inactive_days)
+    for repo in gh.repositories_by(organization):
+        last_push = repo.pushed_at
+        if last_push is None:
+            continue
+        days_inactive = (datetime.now(timezone.utc) - last_push).days
+        if days_inactive > int(inactive_days_threshold):
+            print(f"{repo.html_url}: {days_inactive} days inactive")
+
+
+if __name__ == "__main__":
+    main()
