@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import os
-from datetime import datetime, timezone
+from datetime import datetime
 from os.path import dirname, join
 
 import github3
