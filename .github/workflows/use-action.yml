@@ -1,0 +1,25 @@
+name: stale repo identifier
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '3 2 1 * *'
+
+jobs:
+  build:
+    name: stale repo identifier
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Run stale_repos tool
+      uses: docker://ghcr.io/github/stale_repos:v1
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        ORGANIZATION: super-linter
+        INACTIVE_DAYS: 1

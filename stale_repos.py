@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+""" Find stale repositories in a GitHub organization. """
 import os
 from datetime import datetime
 from os.path import dirname, join
