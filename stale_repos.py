@@ -37,7 +37,7 @@ def main():
     else:
         raise ValueError("GH_TOKEN environment variable not set")
 
-    # Set the topic
+    # Set the threshold for inactive days
     inactive_days_threshold = os.getenv("INACTIVE_DAYS")
     if not inactive_days_threshold:
         raise ValueError("INACTIVE_DAYS environment variable not set")
@@ -50,10 +50,11 @@ def main():
     # Iterate over repos in the org, acquire inactive days,
     # and print out the repo url and days inactive if it's over the threshold (inactive_days)
     for repo in gh.repositories_by(organization):
-        last_push = repo.pushed_at
-        if last_push is None:
+        last_push_str = repo.pushed_at
+        if last_push_str is None:
             continue
-        days_inactive = (datetime.now(timezone.utc) - last_push).days
+        last_push = datetime.fromisoformat(last_push_str[:-1])
+        days_inactive = (datetime.now() - last_push).days
         if days_inactive > int(inactive_days_threshold):
             print(f"{repo.html_url}: {days_inactive} days inactive")
 
