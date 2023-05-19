@@ -6,8 +6,8 @@ from datetime import datetime
 from os.path import dirname, join
 
 import github3
-from dotenv import load_dotenv
 from dateutil.parser import parse
+from dotenv import load_dotenv
 
 
 def main():
