@@ -1,4 +1,5 @@
 FROM python:3.8-slim-buster
+LABEL org.opencontainers.image.source https://github.com/github/stale_repos
 
 WORKDIR /action/workspace
 COPY requirements.txt stale_repos.py /action/workspace/

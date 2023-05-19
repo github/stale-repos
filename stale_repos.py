@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+""" Find stale repositories in a GitHub organization. """
 
 import os
 from datetime import datetime
@@ -31,11 +32,14 @@ def main():
     ghe = os.getenv("GH_ENTERPRISE_URL", default="").strip()
     token = os.getenv("GH_TOKEN")
     if ghe and token:
-        gh = github3.github.GitHubEnterprise(ghe, token=token)
+        github_connection = github3.github.GitHubEnterprise(ghe, token=token)
     elif token:
-        gh = github3.login(token=os.getenv("GH_TOKEN"))
+        github_connection = github3.login(token=os.getenv("GH_TOKEN"))
     else:
         raise ValueError("GH_TOKEN environment variable not set")
+
+    if not github_connection:
+        raise ValueError("Unable to authenticate to GitHub")
 
     # Set the threshold for inactive days
     inactive_days_threshold = os.getenv("INACTIVE_DAYS")
@@ -49,14 +53,14 @@ def main():
 
     # Iterate over repos in the org, acquire inactive days,
     # and print out the repo url and days inactive if it's over the threshold (inactive_days)
-    for repo in gh.repositories_by(organization):
-        last_push_str = repo.pushed_at
+    for repo in github_connection.repositories_by(organization):
+        last_push_str = repo.pushed_at  # type: ignore
         if last_push_str is None:
             continue
         last_push = datetime.fromisoformat(last_push_str[:-1])
         days_inactive = (datetime.now() - last_push).days
         if days_inactive > int(inactive_days_threshold):
-            print(f"{repo.html_url}: {days_inactive} days inactive")
+            print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
 
 
 if __name__ == "__main__":
