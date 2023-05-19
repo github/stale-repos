@@ -7,6 +7,7 @@ from os.path import dirname, join
 
 import github3
 from dotenv import load_dotenv
+from dateutil.parser import parse
 
 
 def main():
@@ -57,7 +58,7 @@ def main():
         last_push_str = repo.pushed_at  # type: ignore
         if last_push_str is None:
             continue
-        last_push = datetime.fromisoformat(last_push_str[:-1])
+        last_push = parse(last_push_str)
         days_inactive = (datetime.now() - last_push).days
         if days_inactive > int(inactive_days_threshold):
             print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
