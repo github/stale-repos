@@ -30,17 +30,7 @@ def main():
     load_dotenv(dotenv_path)
 
     # Auth to GitHub.com
-    ghe = os.getenv("GH_ENTERPRISE_URL", default="").strip()
-    token = os.getenv("GH_TOKEN")
-    if ghe and token:
-        github_connection = github3.github.GitHubEnterprise(ghe, token=token)
-    elif token:
-        github_connection = github3.login(token=os.getenv("GH_TOKEN"))
-    else:
-        raise ValueError("GH_TOKEN environment variable not set")
-
-    if not github_connection:
-        raise ValueError("Unable to authenticate to GitHub")
+    github_connection = auth_to_github()
 
     # Set the threshold for inactive days
     inactive_days_threshold = os.getenv("INACTIVE_DAYS")
@@ -54,6 +44,18 @@ def main():
 
     # Iterate over repos in the org, acquire inactive days,
     # and print out the repo url and days inactive if it's over the threshold (inactive_days)
+    print_inactive_repos(github_connection, inactive_days_threshold, organization)
+
+
+def print_inactive_repos(github_connection, inactive_days_threshold, organization):
+    """Print out the repo url and days inactive if it's over the threshold (inactive_days).
+
+    Args:
+        github_connection: The GitHub connection object.
+        inactive_days_threshold: The threshold (in days) for considering a repo as inactive.
+        organization: The name of the organization to retrieve repositories from.
+
+    """
     for repo in github_connection.repositories_by(organization):
         last_push_str = repo.pushed_at  # type: ignore
         if last_push_str is None:
@@ -62,6 +64,22 @@ def main():
         days_inactive = (datetime.now() - last_push).days
         if days_inactive > int(inactive_days_threshold):
             print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
+
+
+def auth_to_github():
+    """Connect to GitHub.com or GitHub Enterprise, depending on env variables."""
+    ghe = os.getenv("GH_ENTERPRISE_URL", default="").strip()
+    token = os.getenv("GH_TOKEN")
+    if ghe and token:
+        github_connection = github3.github.GitHubEnterprise(ghe, token=token)
+    elif token:
+        github_connection = github3.login(token=os.getenv("GH_TOKEN"))
+    else:
+        raise ValueError("GH_TOKEN environment variable not set")
+
+    if not github_connection:
+        raise ValueError("Unable to authenticate to GitHub")
+    return github_connection  # type: ignore
 
 
 if __name__ == "__main__":
