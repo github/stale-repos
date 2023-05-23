@@ -27,5 +27,5 @@ jobs:
       uses: docker://ghcr.io/github/stale_repos:v1
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
-        ORGANIZATION: super-linter
+        ORGANIZATION: github
         INACTIVE_DAYS: 1
