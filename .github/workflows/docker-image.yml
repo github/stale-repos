@@ -15,4 +15,4 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag stale_repos:"$(date +%s)"
+      run: docker build . --file Dockerfile --platform linux/amd64 --tag stale_repos:"$(date +%s)"
