@@ -46,7 +46,12 @@ def main():
 
     # Iterate over repos in the org, acquire inactive days,
     # and print out the repo url and days inactive if it's over the threshold (inactive_days)
-    print_inactive_repos(github_connection, inactive_days_threshold, organization)
+    inactive_repos = print_inactive_repos(
+        github_connection, inactive_days_threshold, organization
+    )
+
+    # Write the list of inactive repos to a csv file
+    write_to_csv(inactive_repos)
 
 
 def print_inactive_repos(github_connection, inactive_days_threshold, organization):
@@ -56,6 +61,9 @@ def print_inactive_repos(github_connection, inactive_days_threshold, organizatio
         github_connection: The GitHub connection object.
         inactive_days_threshold: The threshold (in days) for considering a repo as inactive.
         organization: The name of the organization to retrieve repositories from.
+
+    Returns:
+        A list of tuples containing the repo and days inactive.
 
     """
     inactive_repos = []
@@ -69,6 +77,20 @@ def print_inactive_repos(github_connection, inactive_days_threshold, organizatio
             inactive_repos.append((repo, days_inactive))
             print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
     print(f"Found {len(inactive_repos)} stale repos in {organization}")
+    return inactive_repos
+
+
+def write_to_csv(inactive_repos):
+    """Write the list of inactive repos to a csv file.
+
+    Args:
+        inactive_repos: A list of tuples containing the repo and days inactive.
+
+    """
+    with open("stale_repos.csv", "w", encoding="utf-8") as file:
+        file.write("Repo,Days Inactive\n")
+        for repo, days_inactive in inactive_repos:
+            file.write(f"{repo.html_url},{days_inactive}\n")
 
 
 def auth_to_github():
