@@ -25,6 +25,8 @@ def main():
     If GH_ENTERPRISE_URL is set, the script will authenticate to a GitHub Enterprise
     instance instead of GitHub.com.
     """
+    print("Starting stale repo search...")
+    
     # Load env variables from file
     dotenv_path = join(dirname(__file__), ".env")
     load_dotenv(dotenv_path)
