@@ -25,6 +25,8 @@ def main():
     If GH_ENTERPRISE_URL is set, the script will authenticate to a GitHub Enterprise
     instance instead of GitHub.com.
     """
+    print("Starting stale repo search...")
+
     # Load env variables from file
     dotenv_path = join(dirname(__file__), ".env")
     load_dotenv(dotenv_path)
@@ -54,6 +56,7 @@ def main():
 
     # Iterate over repos in the org, acquire inactive days,
     # and print out the repo url and days inactive if it's over the threshold (inactive_days)
+    inactive_repos = []
     for repo in github_connection.repositories_by(organization):
         last_push_str = repo.pushed_at  # type: ignore
         if last_push_str is None:
@@ -61,7 +64,9 @@ def main():
         last_push = parse(last_push_str)
         days_inactive = (datetime.now() - last_push).days
         if days_inactive > int(inactive_days_threshold):
+            inactive_repos.append((repo, days_inactive))
             print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
+    print(f"Found {len(inactive_repos)} stale repos in {organization}")
 
 
 if __name__ == "__main__":
