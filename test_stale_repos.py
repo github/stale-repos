@@ -16,10 +16,11 @@ Example:
 
 """
 
+import io
 import os
 import unittest
 from datetime import datetime, timedelta
-from unittest.mock import Mock, patch
+from unittest.mock import MagicMock, Mock, patch
 
 import github3.github
 
@@ -145,32 +146,28 @@ class PrintInactiveReposTestCase(unittest.TestCase):
         threshold.
 
         """
-        github_connection = Mock()
+        # Create a mock GitHub connection object
+        github_connection = MagicMock()
+
+        # Create a mock repository object with a last push time of 30 days ago
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+        mock_repo = MagicMock()
+        mock_repo.pushed_at = thirty_days_ago.isoformat()
+        mock_repo.html_url = "https://github.com/example/repo"
+        github_connection.repositories_by.return_value = [mock_repo]
+
+        # Call the function with a threshold of 20 days
+        inactive_days_threshold = 20
         organization = "example"
-        inactive_days_threshold = 30
-
-        repo1 = Mock()
-        repo1.pushed_at = (datetime.now() - timedelta(days=40)).isoformat()
-        repo1.html_url = "https://github.com/example/repo1"
-        repo2 = Mock()
-        repo2.pushed_at = (datetime.now() - timedelta(days=20)).isoformat()
-        repo2.html_url = "https://github.com/example/repo2"
-        repo3 = Mock()
-        repo3.pushed_at = None
-        repo3.html_url = "https://github.com/example/repo3"
-
-        github_connection.repositories_by.return_value = [repo1, repo2, repo3]
-
-        expected_output = [
-            f"{repo1.html_url}: 40 days inactive",
-        ]
-
-        with unittest.mock.patch("builtins.print") as mock_print:  # type: ignore
+        with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
             print_inactive_repos(
                 github_connection, inactive_days_threshold, organization
             )
+            output = mock_stdout.getvalue()
 
-            mock_print.assert_called_once_with("\n".join(expected_output))
+        # Check that the output contains the expected repo URL and days inactive
+        expected_output = f"{mock_repo.html_url}: 30 days inactive\nFound 1 stale repos in {organization}\n"
+        self.assertEqual(expected_output, output)
 
     def test_print_inactive_repos_with_no_inactive_repos(self):
         """Test printing no inactive repos.
@@ -180,23 +177,27 @@ class PrintInactiveReposTestCase(unittest.TestCase):
         exceed the specified threshold.
 
         """
-        github_connection = Mock()
+        github_connection = MagicMock()
+
+        # Create a mock repository object with a last push time of 30 days ago
+        thirty_days_ago = datetime.now() - timedelta(days=30)
+        mock_repo = MagicMock()
+        mock_repo.pushed_at = thirty_days_ago.isoformat()
+        mock_repo.html_url = "https://github.com/example/repo"
+        github_connection.repositories_by.return_value = [mock_repo]
+
+        # Call the function with a threshold of 40 days
+        inactive_days_threshold = 40
         organization = "example"
-        inactive_days_threshold = 30
-
-        repo1 = Mock()
-        repo1.pushed_at = (datetime.now() - timedelta(days=20)).isoformat()
-        repo2 = Mock()
-        repo2.pushed_at = (datetime.now() - timedelta(days=10)).isoformat()
-
-        github_connection.repositories_by.return_value = [repo1, repo2]
-
-        with unittest.mock.patch("builtins.print") as mock_print:  # type: ignore
+        with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
             print_inactive_repos(
                 github_connection, inactive_days_threshold, organization
             )
+            output = mock_stdout.getvalue()
 
-            mock_print.assert_not_called()
+        # Check that the output contains the expected repo URL and days inactive
+        expected_output = f"Found 0 stale repos in {organization}\n"
+        self.assertEqual(expected_output, output)
 
 
 if __name__ == "__main__":
