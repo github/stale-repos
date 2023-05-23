@@ -5,7 +5,7 @@ This module contains a set of unit tests to verify the behavior of the auth_to_g
 The function is responsible for connecting to GitHub.com or GitHub Enterprise,
 depending on environment variables.
 
-The tests cover different scenarios, such as successful authentication with both enterprise URL 
+The tests cover different scenarios, such as successful authentication with both enterprise URL
 and token, authentication with only a token, missing environment variables, and authentication
 failures.
 
@@ -20,10 +20,9 @@ import io
 import os
 import unittest
 from datetime import datetime, timedelta
-from unittest.mock import MagicMock, Mock, patch
+from unittest.mock import MagicMock, patch
 
 import github3.github
-
 from stale_repos import auth_to_github, print_inactive_repos
 
 
