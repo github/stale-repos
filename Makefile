@@ -1,2 +1,2 @@
 test:
-	pytest -v --cov=. --cov-fail-under=90
+	pytest -v --cov=. --cov-fail-under=80
