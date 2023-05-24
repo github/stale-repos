@@ -2,7 +2,7 @@
 """ Find stale repositories in a GitHub organization. """
 
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from os.path import dirname, join
 
 import github3
@@ -72,7 +72,7 @@ def print_inactive_repos(github_connection, inactive_days_threshold, organizatio
         if last_push_str is None:
             continue
         last_push = parse(last_push_str)
-        days_inactive = (datetime.now() - last_push).days
+        days_inactive = (datetime.now(timezone.utc) - last_push).days
         if days_inactive > int(inactive_days_threshold):
             inactive_repos.append((repo, days_inactive))
             print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
