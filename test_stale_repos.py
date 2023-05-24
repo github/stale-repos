@@ -23,7 +23,6 @@ from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, call, patch
 
 import github3.github
-
 from stale_repos import auth_to_github, get_inactive_repos, write_to_markdown
 
 
