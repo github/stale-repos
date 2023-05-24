@@ -37,7 +37,25 @@ jobs:
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
         ORGANIZATION: ${{ secrets.ORGANIZATION }}
-        INACTIVE_DAYS: 365 
+        INACTIVE_DAYS: 365
+
+    - name: Create issue
+      uses: peter-evans/create-issue-from-file@v4
+      with:
+        title: Stale repository report
+        content-filepath: ./stale_repos.md
+        assignees: <YOUR_GITHUB_HANDLE_HERE>
+
+```
+
+### Example stale_repos.md output
+
+```markdown
+# Inactive Repositories
+
+| Repository URL | Days Inactive |
+| --- | ---: |
+| https://github.com/github/.github | 5 |
 ```
 
 ## Local usage without Docker

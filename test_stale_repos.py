@@ -19,11 +19,11 @@ Example:
 import io
 import os
 import unittest
-from datetime import datetime, timedelta
-from unittest.mock import MagicMock, patch
+from datetime import datetime, timedelta, timezone
+from unittest.mock import MagicMock, call, patch
 
 import github3.github
-from stale_repos import auth_to_github, print_inactive_repos
+from stale_repos import auth_to_github, get_inactive_repos, write_to_markdown
 
 
 class AuthToGithubTestCase(unittest.TestCase):
@@ -149,23 +149,25 @@ class PrintInactiveReposTestCase(unittest.TestCase):
         github_connection = MagicMock()
 
         # Create a mock repository object with a last push time of 30 days ago
-        thirty_days_ago = datetime.now() - timedelta(days=30)
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         mock_repo = MagicMock()
         mock_repo.pushed_at = thirty_days_ago.isoformat()
         mock_repo.html_url = "https://github.com/example/repo"
+        mock_repo.archived = False
         github_connection.repositories_by.return_value = [mock_repo]
 
         # Call the function with a threshold of 20 days
         inactive_days_threshold = 20
         organization = "example"
         with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
-            print_inactive_repos(
-                github_connection, inactive_days_threshold, organization
-            )
+            get_inactive_repos(github_connection, inactive_days_threshold, organization)
             output = mock_stdout.getvalue()
 
         # Check that the output contains the expected repo URL and days inactive
-        expected_output = f"{mock_repo.html_url}: 30 days inactive\nFound 1 stale repos in {organization}\n"
+        expected_output = (
+            f"{mock_repo.html_url}: 30 days inactive\n"
+            f"Found 1 stale repos in {organization}\n"
+        )
         self.assertEqual(expected_output, output)
 
     def test_print_inactive_repos_with_no_inactive_repos(self):
@@ -179,7 +181,7 @@ class PrintInactiveReposTestCase(unittest.TestCase):
         github_connection = MagicMock()
 
         # Create a mock repository object with a last push time of 30 days ago
-        thirty_days_ago = datetime.now() - timedelta(days=30)
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         mock_repo = MagicMock()
         mock_repo.pushed_at = thirty_days_ago.isoformat()
         mock_repo.html_url = "https://github.com/example/repo"
@@ -189,14 +191,50 @@ class PrintInactiveReposTestCase(unittest.TestCase):
         inactive_days_threshold = 40
         organization = "example"
         with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
-            print_inactive_repos(
-                github_connection, inactive_days_threshold, organization
-            )
+            get_inactive_repos(github_connection, inactive_days_threshold, organization)
             output = mock_stdout.getvalue()
 
         # Check that the output contains the expected repo URL and days inactive
         expected_output = f"Found 0 stale repos in {organization}\n"
         self.assertEqual(expected_output, output)
+
+
+class WriteToMarkdownTestCase(unittest.TestCase):
+    """
+    Unit test case for the write_to_markdown() function.
+    """
+
+    def test_write_to_markdown(self):
+        """Test that the write_to_markdown function writes the expected data to a file.
+
+        This test creates a list of inactive repos and a mock file object using MagicMock.
+        It then calls the write_to_markdown function with the list of inactive repos and
+        the mock file object. Finally, it uses the assert_has_calls method to check that
+        the mock file object was called with the expected data.
+
+        """
+
+        # Create a list of inactive repos
+        inactive_repos = [
+            ("https://github.com/example/repo2", 40),
+            ("https://github.com/example/repo1", 30),
+        ]
+
+        # Create a mock file object
+        mock_file = MagicMock()
+
+        # Call the write_to_markdown function with the mock file object
+        write_to_markdown(inactive_repos, file=mock_file)
+
+        # Check that the mock file object was called with the expected data
+        expected_calls = [
+            call.write("# Inactive Repositories\n\n"),
+            call.write("| Repository URL | Days Inactive |\n"),
+            call.write("| --- | ---: |\n"),
+            call.write("| https://github.com/example/repo2 | 40 |\n"),
+            call.write("| https://github.com/example/repo1 | 30 |\n"),
+        ]
+        mock_file.__enter__.return_value.assert_has_calls(expected_calls)
 
 
 if __name__ == "__main__":

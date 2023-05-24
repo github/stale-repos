@@ -2,7 +2,7 @@
 """ Find stale repositories in a GitHub organization. """
 
 import os
-from datetime import datetime
+from datetime import datetime, timezone
 from os.path import dirname, join
 
 import github3
@@ -46,16 +46,25 @@ def main():
 
     # Iterate over repos in the org, acquire inactive days,
     # and print out the repo url and days inactive if it's over the threshold (inactive_days)
-    print_inactive_repos(github_connection, inactive_days_threshold, organization)
+    inactive_repos = get_inactive_repos(
+        github_connection, inactive_days_threshold, organization
+    )
+
+    # Write the list of inactive repos to a csv file
+    write_to_markdown(inactive_repos)
 
 
-def print_inactive_repos(github_connection, inactive_days_threshold, organization):
-    """Print out the repo url and days inactive if it's over the threshold (inactive_days).
+def get_inactive_repos(github_connection, inactive_days_threshold, organization):
+    """Return and print out the repo url and days inactive if it's over
+       the threshold (inactive_days).
 
     Args:
         github_connection: The GitHub connection object.
         inactive_days_threshold: The threshold (in days) for considering a repo as inactive.
         organization: The name of the organization to retrieve repositories from.
+
+    Returns:
+        A list of tuples containing the repo and days inactive.
 
     """
     inactive_repos = []
@@ -64,11 +73,30 @@ def print_inactive_repos(github_connection, inactive_days_threshold, organizatio
         if last_push_str is None:
             continue
         last_push = parse(last_push_str)
-        days_inactive = (datetime.now() - last_push).days
-        if days_inactive > int(inactive_days_threshold):
-            inactive_repos.append((repo, days_inactive))
+        days_inactive = (datetime.now(timezone.utc) - last_push).days
+        if days_inactive > int(inactive_days_threshold) and not repo.archived:
+            inactive_repos.append((repo.html_url, days_inactive))
             print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
     print(f"Found {len(inactive_repos)} stale repos in {organization}")
+    return inactive_repos
+
+
+def write_to_markdown(inactive_repos, file=None):
+    """Write the list of inactive repos to a markdown file.
+
+    Args:
+        inactive_repos: A list of tuples containing the repo and days inactive.
+        file: A file object to write to. If None, a new file will be created.
+
+    """
+    inactive_repos.sort(key=lambda x: x[1], reverse=True)
+    with file or open("stale_repos.md", "w", encoding="utf-8") as file:
+        file.write("# Inactive Repositories\n\n")
+        file.write("| Repository URL | Days Inactive |\n")
+        file.write("| --- | ---: |\n")
+        for repo_url, days_inactive in inactive_repos:
+            file.write(f"| {repo_url} | {days_inactive} |\n")
+    print("Wrote stale repos to stale_repos.md")
 
 
 def auth_to_github():
