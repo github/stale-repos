@@ -98,8 +98,9 @@ Once the code is ready to release please do the following
 4. Publish the release
 5. Clone the repository at the release tag locally or in a codespace
 6. Authenticate to ghcr.io using [these instructions](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-to-the-container-registry)
-7. `docker build -t ghcr.io/github/stale_repos:v1 .` where v1 is the current major version number
-8. `docker build -t ghcr.io/github/stale_repos:v1.0.0 .` where v1.0.0 is the full version number
+7. `docker build --platform linux/amd64 -t ghcr.io/github/stale_repos:v1 .` where v1 is the current major version number
+8. `docker build --platform linux/amd64 -t ghcr.io/github/stale_repos:v1.0.0 .` where v1.0.0 is the full version number
 9. `docker push ghcr.io/github/stale_repos:v1` where v1 is the current major version number
 10. `docker push ghcr.io/github/stale_repos:v1.0.0` where v1.0.0 is the full version number
-11. Update the `action.yml` and `README.md` instructions to point to the new docker container if its a major version number change
+11. `docker push ghcr.io/github/stale_repos:latest`
+12. Update the `action.yml` and `README.md` instructions to point to the new docker container if its a major version number change
