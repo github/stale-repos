@@ -93,6 +93,7 @@ def write_to_markdown(inactive_repos):
         file.write("| --- | ---: |\n")
         for repo, days_inactive in inactive_repos:
             file.write(f"| {repo.html_url} | {days_inactive} |\n")
+    print("Wrote stale repos to stale_repos.md")
 
 
 def auth_to_github():
