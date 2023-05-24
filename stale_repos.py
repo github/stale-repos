@@ -51,7 +51,7 @@ def main():
     )
 
     # Write the list of inactive repos to a csv file
-    write_to_csv(inactive_repos)
+    write_to_markdown(inactive_repos)
 
 
 def print_inactive_repos(github_connection, inactive_days_threshold, organization):
@@ -80,17 +80,19 @@ def print_inactive_repos(github_connection, inactive_days_threshold, organizatio
     return inactive_repos
 
 
-def write_to_csv(inactive_repos):
-    """Write the list of inactive repos to a csv file.
+def write_to_markdown(inactive_repos):
+    """Write the list of inactive repos to a markdown file.
 
     Args:
         inactive_repos: A list of tuples containing the repo and days inactive.
 
     """
-    with open("stale_repos.csv", "w", encoding="utf-8") as file:
-        file.write("Repo,Days Inactive\n")
+    with open("stale_repos.md", "w", encoding="utf-8") as file:
+        file.write("# Inactive Repositories\n\n")
+        file.write("| Repository URL | Days Inactive |\n")
+        file.write("| --- | ---: |\n")
         for repo, days_inactive in inactive_repos:
-            file.write(f"{repo.html_url},{days_inactive}\n")
+            file.write(f"| {repo.html_url} | {days_inactive} |\n")
 
 
 def auth_to_github():
