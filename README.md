@@ -2,7 +2,7 @@
 
 This project identifies and reports repositories with no activity for configurable amount of time, in order to surface inactive repos to be considered for archival. The current approach assumes that the repos that you want to evaluate are available in a single GitHub organization.
 
-This action was developed by GitHub so that we can keep our open source projects well maintained, and it was made open source in the hopes that it would help you too! To find out more about how GitHub manages it's open source, check out the [github-ospo repository](https://github.com/github/github-ospo).
+This action was developed by GitHub so that we can keep our open source projects well maintained, and it was made open source in the hopes that it would help you too! To find out more about how GitHub manages its open source, check out the [github-ospo repository](https://github.com/github/github-ospo).
 
 If you are looking to identify stale pull requests and issues, check out [actions/stale](https://github.com/actions/stale)
 
