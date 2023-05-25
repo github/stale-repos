@@ -1,7 +1,7 @@
 ---
-name: 'stale_repos'
+name: 'stale-repos'
 author: 'github'
-description: 'A GitHub Action to identify stale repos within an organization that should be considered for archive.'
+description: 'A GitHub Action to identify stale repos within an organization that should be considered for archival.'
 runs:
   using: 'docker'
   image: 'docker://ghcr.io/github/stale_repos:v1'
