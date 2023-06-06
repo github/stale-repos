@@ -18,6 +18,17 @@ If you need support using this project or have questions about it, please [open 
 Note: Your GitHub token will need to have read/write access to all the repositories in the organization that you want evaluated
 1. Copy the below example workflow to your repository and put it in the `.github/workflows/` directory with the file extension `.yml` (ie. `.github/workflows/stale_repos.yml`)
 
+### Configuration
+
+Below are the allowed configuration options:
+
+| field                 | required | default | description |
+|-----------------------|----------|---------|-------------|
+| `GH_TOKEN`            | true     |         | The GitHub Token used to scan repositories. Must have read and write access to all repositories |
+| `ORGANIZATION`        | true     |         | The organization to scan for stale repositories |
+| `INACTIVE_DAYS`       | true     |         | The number of days used to determine if repository is stale |
+| `GH_ENTERPRISE_URL`   | false    | `""`    | URL of GitHub Enterprise instance to use for auth instead of github.com |
+
 ### Example workflow
 
 ```yaml
@@ -36,7 +47,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    
+
     - name: Run stale_repos tool
       uses: docker://ghcr.io/github/stale_repos:v1
       env:
@@ -50,6 +61,7 @@ jobs:
         title: Stale repository report
         content-filepath: ./stale_repos.md
         assignees: <YOUR_GITHUB_HANDLE_HERE>
+        token: ${{ secrets.GH_TOKEN }}
 
 ```
 

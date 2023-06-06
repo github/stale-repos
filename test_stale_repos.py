@@ -138,37 +138,57 @@ class PrintInactiveReposTestCase(unittest.TestCase):
     """
 
     def test_print_inactive_repos_with_inactive_repos(self):
-        """Test printing inactive repos that exceed the threshold.
+        """Test that get_inactive_repos returns the expected list of inactive repos.
 
-        This test verifies that the print_inactive_repos() function correctly prints the URL and
-        days inactive for repositories that have been inactive for more than the specified
-        threshold.
+        This test uses a MagicMock object to simulate a GitHub API connection with a list
+        of repositories with varying levels of inactivity. It then calls the get_inactive_repos
+        function with the mock GitHub API connection and a threshold of 30 days. Finally, it
+        checks that the function returns the expected list of inactive repos.
 
         """
-        # Create a mock GitHub connection object
-        github_connection = MagicMock()
+        # Create a MagicMock object to simulate a GitHub API connection
+        mock_github = MagicMock()
 
-        # Create a mock repository object with a last push time of 30 days ago
-        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
-        mock_repo = MagicMock()
-        mock_repo.pushed_at = thirty_days_ago.isoformat()
-        mock_repo.html_url = "https://github.com/example/repo"
-        mock_repo.archived = False
-        github_connection.repositories_by.return_value = [mock_repo]
+        # Create a MagicMock object to simulate the organization object returned by the
+        # GitHub API connection
+        mock_org = MagicMock()
 
-        # Call the function with a threshold of 20 days
-        inactive_days_threshold = 20
-        organization = "example"
-        with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
-            get_inactive_repos(github_connection, inactive_days_threshold, organization)
-            output = mock_stdout.getvalue()
-
-        # Check that the output contains the expected repo URL and days inactive
-        expected_output = (
-            f"{mock_repo.html_url}: 30 days inactive\n"
-            f"Found 1 stale repos in {organization}\n"
+        # Create MagicMock objects to simulate the repositories returned by the organization object
+        forty_days_ago = datetime.now(timezone.utc) - timedelta(days=40)
+        twenty_days_ago = datetime.now(timezone.utc) - timedelta(days=20)
+        mock_repo1 = MagicMock(
+            html_url="https://github.com/example/repo1",
+            pushed_at=twenty_days_ago.isoformat(),
+            archived=False,
         )
-        self.assertEqual(expected_output, output)
+        mock_repo2 = MagicMock(
+            html_url="https://github.com/example/repo2",
+            pushed_at=forty_days_ago.isoformat(),
+            archived=False,
+        )
+        mock_repo3 = MagicMock(
+            html_url="https://github.com/example/repo3",
+            pushed_at=forty_days_ago.isoformat(),
+            archived=True,
+        )
+
+        # Set up the MagicMock objects to return the expected values when called
+        mock_github.organization.return_value = mock_org
+        mock_org.repositories.return_value = [
+            mock_repo1,
+            mock_repo2,
+            mock_repo3,
+        ]
+
+        # Call the get_inactive_repos function with the mock GitHub API
+        # connection and a threshold of 30 days
+        inactive_repos = get_inactive_repos(mock_github, 30, "example")
+
+        # Check that the function returns the expected list of inactive repos
+        expected_inactive_repos = [
+            ("https://github.com/example/repo2", 40),
+        ]
+        assert inactive_repos == expected_inactive_repos
 
     def test_print_inactive_repos_with_no_inactive_repos(self):
         """Test printing no inactive repos.
