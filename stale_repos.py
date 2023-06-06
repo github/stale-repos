@@ -93,7 +93,9 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
     inactive_repos.sort(key=lambda x: x[1], reverse=True)
     with file or open("stale_repos.md", "w", encoding="utf-8") as file:
         file.write("# Inactive Repositories\n\n")
-        file.write(f"The following repos have not had a push event for more than {inactive_days_threshold} days:\n\n")
+        file.write(
+            f"The following repos have not had a push event for more than {inactive_days_threshold} days:\n\n"
+        )
         file.write("| Repository URL | Days Inactive |\n")
         file.write("| --- | ---: |\n")
         for repo_url, days_inactive in inactive_repos:
