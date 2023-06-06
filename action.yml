@@ -3,11 +3,11 @@ name: 'stale-repos'
 author: 'github'
 description: 'A GitHub Action to identify stale repos within an organization that should be considered for archival.'
 outputs:
-  inactiveRepos:
+  staleRepos:
     description: "Inactive Repos in the organization"
 runs:
-  using: "docker"
-  image: "Dockerfile"
+  using: 'docker'
+  image: 'docker://ghcr.io/github/stale_repos:v1'
 branding:
   icon: 'check-square'
   color: 'white'

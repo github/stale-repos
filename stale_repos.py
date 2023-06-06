@@ -112,8 +112,8 @@ def output_to_json(inactive_repos):
     # json structure is like following
     # [
     #   {
-    #     "repo": "repo",
-    #     "daysInactive": "days_inactive"
+    #     "url": "https://github.com/owner/repo",
+    #     "daysInactive": 366
     #   }
     # ]
     inactive_repos_json = []
