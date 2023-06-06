@@ -220,16 +220,18 @@ class WriteToMarkdownTestCase(unittest.TestCase):
             ("https://github.com/example/repo1", 30),
         ]
 
+        inactive_days_threshold = 365
+
         # Create a mock file object
         mock_file = MagicMock()
 
         # Call the write_to_markdown function with the mock file object
-        write_to_markdown(inactive_repos, file=mock_file)
+        write_to_markdown(inactive_repos, inactive_days_threshold, file=mock_file)
 
         # Check that the mock file object was called with the expected data
         expected_calls = [
             call.write("# Inactive Repositories\n\n"),
-            call.write("The following repositories have not had a push event for more than 20 days:\n\n"),
+            call.write("The following repos have not had a push event for more than 365 days:\n\n"),
             call.write("| Repository URL | Days Inactive |\n"),
             call.write("| --- | ---: |\n"),
             call.write("| https://github.com/example/repo2 | 40 |\n"),
