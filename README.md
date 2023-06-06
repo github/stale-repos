@@ -1,7 +1,7 @@
 # Stale Repos Action
 (Used by the `github` organization!)
 
-This project identifies and reports repositories with no activity for configurable amount of time, in order to surface inactive repos to be considered for archival. The current approach assumes that the repos that you want to evaluate are available in a single GitHub organization.
+This project identifies and reports repositories with no activity for configurable amount of time, in order to surface inactive repos to be considered for archival. The current approach assumes that the repos that you want to evaluate are available in a single GitHub organization. For the purpose of this action, a repository is considered inactive if it has not had a `push` in a configurable amount of days.
 
 This action was developed by GitHub so that we can keep our open source projects well maintained, and it was made open source in the hopes that it would help you too! We are actively using and are archiving things in batches since there are many repositories on our report. To find out more about how GitHub manages its open source, check out the [github-ospo repository](https://github.com/github/github-ospo).
 
@@ -26,7 +26,7 @@ Below are the allowed configuration options:
 |-----------------------|----------|---------|-------------|
 | `GH_TOKEN`            | true     |         | The GitHub Token used to scan repositories. Must have read and write access to all repositories |
 | `ORGANIZATION`        | true     |         | The organization to scan for stale repositories |
-| `INACTIVE_DAYS`       | true     |         | The number of days used to determine if repository is stale |
+| `INACTIVE_DAYS`       | true     |         | The number of days used to determine if repository is stale, based on `push` events |
 | `GH_ENTERPRISE_URL`   | false    | `""`    | URL of GitHub Enterprise instance to use for auth instead of github.com |
 
 ### Example workflow
