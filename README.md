@@ -1,15 +1,21 @@
 # Stale Repos Action
 (Used by the `github` organization!)
 
-This project identifies and reports repositories with no activity for configurable amount of time, in order to surface inactive repos to be considered for archival. The current approach assumes that the repos that you want to evaluate are available in a single GitHub organization.
+This project identifies and reports repositories with no activity for configurable amount of time, in order to surface inactive repos to be considered for archival.
+The current approach assumes that the repos that you want to evaluate are available in a single GitHub organization.
+For the purpose of this action, a repository is considered inactive if it has not had a `push` in a configurable amount of days.
 
-This action was developed by GitHub so that we can keep our open source projects well maintained, and it was made open source in the hopes that it would help you too! We are actively using and are archiving things in batches since there are many repositories on our report. To find out more about how GitHub manages its open source, check out the [github-ospo repository](https://github.com/github/github-ospo).
+This action was developed by GitHub so that we can keep our open source projects well maintained, and it was made open source in the hopes that it would help you too!
+We are actively using and are archiving things in batches since there are many repositories on our report.
+To find out more about how GitHub manages its open source, check out the [github-ospo repository](https://github.com/github/github-ospo).
 
 If you are looking to identify stale pull requests and issues, check out [actions/stale](https://github.com/actions/stale)
 
 ## Support
 
-If you need support using this project or have questions about it, please [open up an issue in this repository](https://github.com/github/stale-repos/issues). Requests made directly to GitHub staff or support team will be redirected here to open an issue. GitHub SLA's and support/services contracts do not apply to this repository.
+If you need support using this project or have questions about it, please [open up an issue in this repository](https://github.com/github/stale-repos/issues).
+Requests made directly to GitHub staff or support team will be redirected here to open an issue.
+GitHub SLA's and support/services contracts do not apply to this repository.
 
 ## Use as a GitHub Action
 
@@ -26,7 +32,7 @@ Below are the allowed configuration options:
 |-----------------------|----------|---------|-------------|
 | `GH_TOKEN`            | true     |         | The GitHub Token used to scan repositories. Must have read and write access to all repositories |
 | `ORGANIZATION`        | true     |         | The organization to scan for stale repositories |
-| `INACTIVE_DAYS`       | true     |         | The number of days used to determine if repository is stale |
+| `INACTIVE_DAYS`       | true     |         | The number of days used to determine if repository is stale, based on `push` events |
 | `GH_ENTERPRISE_URL`   | false    | `""`    | URL of GitHub Enterprise instance to use for auth instead of github.com |
 
 ### Example workflow
@@ -69,6 +75,8 @@ jobs:
 
 ```markdown
 # Inactive Repositories
+
+The following repos have not had a push event for more than 3 days:
 
 | Repository URL | Days Inactive |
 | --- | ---: |
