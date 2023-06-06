@@ -33,15 +33,13 @@ jobs:
     - uses: actions/github-script@v6
       with:
         script: |
-          const repos = ${{ steps.stale-repos.outputs.inactiveRepos }};
-          const repoList = repos.split(',');
-          for (const repo of repoList) {
+          const repos = JSON.parse(${{ steps.stale-repos.outputs.inactiveRepos }});
+          for (const repo of repos) {
             console.log(repo);
-            const [owner, repoName] = repo.split('/');
             const issue = await github.rest.issues.create({
               owner: akbast,
               repo: stale-repos,
-              title: 'Stale repo' + repoName,
+              title: 'Stale repo' + repo.url,
               body: 'This repo is stale. Please contact the owner to make it active again.',
             });
             console.log(issue);
