@@ -229,6 +229,7 @@ class WriteToMarkdownTestCase(unittest.TestCase):
         # Check that the mock file object was called with the expected data
         expected_calls = [
             call.write("# Inactive Repositories\n\n"),
+            call.write("The following repositories have not had a push event for more than 20 days:\n\n"),
             call.write("| Repository URL | Days Inactive |\n"),
             call.write("| --- | ---: |\n"),
             call.write("| https://github.com/example/repo2 | 40 |\n"),
