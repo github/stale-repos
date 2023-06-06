@@ -53,7 +53,7 @@ def main():
 
     output_to_json(inactive_repos)
     # Write the list of inactive repos to a csv file
-    write_to_markdown(inactive_repos)
+    write_to_markdown(inactive_repos, inactive_days_threshold)
 
 
 def get_inactive_repos(github_connection, inactive_days_threshold, organization):
@@ -85,17 +85,21 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
     return inactive_repos
 
 
-def write_to_markdown(inactive_repos, file=None):
+def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
     """Write the list of inactive repos to a markdown file.
 
     Args:
         inactive_repos: A list of tuples containing the repo and days inactive.
+        inactive_days_threshold: The threshold (in days) for considering a repo as inactive.
         file: A file object to write to. If None, a new file will be created.
 
     """
     inactive_repos.sort(key=lambda x: x[1], reverse=True)
     with file or open("stale_repos.md", "w", encoding="utf-8") as file:
         file.write("# Inactive Repositories\n\n")
+        file.write(
+            f"The following repos have not had a push event for more than {inactive_days_threshold} days:\n\n"
+        )
         file.write("| Repository URL | Days Inactive |\n")
         file.write("| --- | ---: |\n")
         for repo_url, days_inactive in inactive_repos:
