@@ -61,6 +61,7 @@ jobs:
         title: Stale repository report
         content-filepath: ./stale_repos.md
         assignees: <YOUR_GITHUB_HANDLE_HERE>
+        token: ${{ secrets.GH_TOKEN }}
 
 ```
 
