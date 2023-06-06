@@ -33,7 +33,7 @@ jobs:
     - uses: actions/github-script@v6
       with:
         script: |
-          const repos = JSON.parse(${{ steps.stale-repos.outputs.inactiveRepos }});
+          const repos = ${{ steps.stale-repos.outputs.inactiveRepos }}
           for (const repo of repos) {
             console.log(repo);
             const issue = await github.rest.issues.create({
