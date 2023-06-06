@@ -1,1 +1,0 @@
-disable=SC2129 # Disable individual redirects check, https://www.shellcheck.net/wiki/SC2129
