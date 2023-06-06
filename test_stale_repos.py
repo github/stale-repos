@@ -17,13 +17,20 @@ Example:
 """
 
 import io
+import json
 import os
 import unittest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, call, patch
 
 import github3.github
-from stale_repos import auth_to_github, get_inactive_repos, write_to_markdown
+
+from stale_repos import (
+    auth_to_github,
+    get_inactive_repos,
+    output_to_json,
+    write_to_markdown,
+)
 
 
 class AuthToGithubTestCase(unittest.TestCase):
@@ -198,20 +205,29 @@ class PrintInactiveReposTestCase(unittest.TestCase):
         exceed the specified threshold.
 
         """
-        github_connection = MagicMock()
+        mock_github = MagicMock()
+        mock_org = MagicMock()
 
         # Create a mock repository object with a last push time of 30 days ago
         thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
-        mock_repo = MagicMock()
-        mock_repo.pushed_at = thirty_days_ago.isoformat()
-        mock_repo.html_url = "https://github.com/example/repo"
-        github_connection.repositories_by.return_value = [mock_repo]
+        mock_repo1 = MagicMock()
+        mock_repo1.pushed_at = thirty_days_ago.isoformat()
+        mock_repo1.html_url = "https://github.com/example/repo"
+        mock_repo2 = MagicMock()
+        mock_repo2.pushed_at = None
+        mock_repo2.html_url = "https://github.com/example/repo2"
+
+        mock_github.organization.return_value = mock_org
+        mock_org.repositories.return_value = [
+            mock_repo1,
+            mock_repo2,
+        ]
 
         # Call the function with a threshold of 40 days
         inactive_days_threshold = 40
         organization = "example"
         with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
-            get_inactive_repos(github_connection, inactive_days_threshold, organization)
+            get_inactive_repos(mock_github, inactive_days_threshold, organization)
             output = mock_stdout.getvalue()
 
         # Check that the output contains the expected repo URL and days inactive
@@ -260,6 +276,38 @@ class WriteToMarkdownTestCase(unittest.TestCase):
             call.write("| https://github.com/example/repo1 | 30 |\n"),
         ]
         mock_file.__enter__.return_value.assert_has_calls(expected_calls)
+
+
+class OutputToJson(unittest.TestCase):
+    """
+    Unit test case for the output_to_json() function.
+    """
+
+    def test_output_to_json(self):
+        """Test that output_to_json returns the expected json string.
+
+        This test creates a list of inactive repos and calls the
+        output_to_json function with the list. It then checks that the
+        function returns the expected json string.
+
+        """
+        # Create a list of inactive repos
+        inactive_repos = [
+            ("https://github.com/example/repo1", 31),
+            ("https://github.com/example/repo2", 30),
+            ("https://github.com/example/repo3", 29),
+        ]
+
+        # Call the output_to_json function with the list of inactive repos
+        expected_json = json.dumps(
+            [
+                {"url": "https://github.com/example/repo1", "daysInactive": 31},
+                {"url": "https://github.com/example/repo2", "daysInactive": 30},
+                {"url": "https://github.com/example/repo3", "daysInactive": 29},
+            ]
+        )
+        actual_json = output_to_json(inactive_repos)
+        assert actual_json == expected_json
 
 
 if __name__ == "__main__":

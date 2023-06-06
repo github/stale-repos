@@ -11,7 +11,7 @@ from dateutil.parser import parse
 from dotenv import load_dotenv
 
 
-def main():
+def main():  # pragma: no cover
     """
     Iterate over all repositories in the specified organization on GitHub,
     calculate the number of days since each repository was last pushed to,
@@ -98,7 +98,8 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
     with file or open("stale_repos.md", "w", encoding="utf-8") as file:
         file.write("# Inactive Repositories\n\n")
         file.write(
-            f"The following repos have not had a push event for more than {inactive_days_threshold} days:\n\n"
+            f"The following repos have not had a push event for more than "
+            f"{inactive_days_threshold} days:\n\n"
         )
         file.write("| Repository URL | Days Inactive |\n")
         file.write("| --- | ---: |\n")
@@ -106,11 +107,15 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
             file.write(f"| {repo_url} | {days_inactive} |\n")
     print("Wrote stale repos to stale_repos.md")
 
+
 def output_to_json(inactive_repos):
     """Convert the list of inactive repos to a json string.
 
     Args:
         inactive_repos: A list of tuples containing the repo and days inactive.
+
+    Returns:
+        JSON formatted string of the list of inactive repos.
 
     """
     # json structure is like following
@@ -126,6 +131,8 @@ def output_to_json(inactive_repos):
     inactive_repos_json = json.dumps(inactive_repos_json)
 
     print(f"::set-output name=inactiveRepos::{inactive_repos_json}")
+    return inactive_repos_json
+
 
 def auth_to_github():
     """Connect to GitHub.com or GitHub Enterprise, depending on env variables."""
