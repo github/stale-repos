@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 """ Find stale repositories in a GitHub organization. """
 
+import json
 import os
 from datetime import datetime, timezone
 from os.path import dirname, join
@@ -50,6 +51,7 @@ def main():
         github_connection, inactive_days_threshold, organization
     )
 
+    output_to_json(inactive_repos)
     # Write the list of inactive repos to a csv file
     write_to_markdown(inactive_repos, inactive_days_threshold)
 
@@ -104,6 +106,26 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
             file.write(f"| {repo_url} | {days_inactive} |\n")
     print("Wrote stale repos to stale_repos.md")
 
+def output_to_json(inactive_repos):
+    """Convert the list of inactive repos to a json string.
+
+    Args:
+        inactive_repos: A list of tuples containing the repo and days inactive.
+
+    """
+    # json structure is like following
+    # [
+    #   {
+    #     "url": "https://github.com/owner/repo",
+    #     "daysInactive": 366
+    #   }
+    # ]
+    inactive_repos_json = []
+    for repo_url, days_inactive in inactive_repos:
+        inactive_repos_json.append({"url": repo_url, "daysInactive": days_inactive})
+    inactive_repos_json = json.dumps(inactive_repos_json)
+
+    print(f"::set-output name=inactiveRepos::{inactive_repos_json}")
 
 def auth_to_github():
     """Connect to GitHub.com or GitHub Enterprise, depending on env variables."""

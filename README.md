@@ -83,6 +83,54 @@ The following repos have not had a push event for more than 3 days:
 | https://github.com/github/.github | 5 |
 ```
 
+### Using JSON instead of Markdown
+
+The action outputs inactive repos in JSON format for further actions. 
+
+Example usage:
+```yaml
+name: stale repo identifier
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '3 2 1 * *'
+
+jobs:
+  build:
+    name: stale repo identifier
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Run stale_repos tool
+      id: stale-repos
+      uses: docker://ghcr.io/github/stale_repos:v1
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        ORGANIZATION: ${{ secrets.ORGANIZATION }}
+        INACTIVE_DAYS: 365
+
+    - name: Print output of stale_repos tool
+      run: echo "${{ steps.stale-repos.outputs.inactiveRepos }}"
+    - uses: actions/github-script@v6
+      with:
+        script: |
+          const repos = ${{ steps.stale-repos.outputs.inactiveRepos }}
+          for (const repo of repos) {
+            console.log(repo);
+            const issue = await github.rest.issues.create({
+              owner: <ORG_OWNER>,
+              repo: <REPOSITORY>,
+              title: 'Stale repo' + repo.url,
+              body: 'This repo is stale. Please contact the owner to make it active again.',
+            });
+            console.log(issue);
+          }
+        github-token: ${{ secrets.GH_TOKEN }}
+```
 ## Local usage without Docker
 
 1. Copy `.env-example` to `.env`
