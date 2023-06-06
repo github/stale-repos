@@ -68,7 +68,9 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
 
     """
     inactive_repos = []
-    for repo in github_connection.repositories_by(organization):
+    org = github_connection.organization(organization)
+
+    for repo in org.repositories():
         last_push_str = repo.pushed_at  # type: ignore
         if last_push_str is None:
             continue
