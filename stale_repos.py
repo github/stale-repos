@@ -50,6 +50,8 @@ def main():
         github_connection, inactive_days_threshold, organization
     )
 
+    print(f"::set-output name=inactiveRepos::{inactive_repos}")
+
     # Write the list of inactive repos to a csv file
     write_to_markdown(inactive_repos)
 

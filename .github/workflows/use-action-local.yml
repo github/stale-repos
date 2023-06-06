@@ -1,0 +1,32 @@
+name: stale repo identifier
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  issues: write
+  packages: read
+
+jobs:
+  build:
+    name: stale repo identifier
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+    
+    - name: Run stale_repos tool
+      id: stale-repos
+      uses: akbast/stale-repos@main
+      env:
+        GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        ORGANIZATION: akbas-orga
+        INACTIVE_DAYS: 1
+
+    - name: Print output of stale_repos tool
+      run: echo "${{ steps.stale-repos.outputs.inactiveRepos }}"
