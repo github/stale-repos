@@ -1,4 +1,4 @@
-name: stale repo identifier
+name: stale repo identifier local
 
 on:
   workflow_dispatch:
