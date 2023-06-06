@@ -17,13 +17,20 @@ Example:
 """
 
 import io
+import json
 import os
 import unittest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import MagicMock, call, patch
 
 import github3.github
-from stale_repos import auth_to_github, get_inactive_repos, write_to_markdown
+
+from stale_repos import (
+    auth_to_github,
+    get_inactive_repos,
+    output_to_json,
+    write_to_markdown,
+)
 
 
 class AuthToGithubTestCase(unittest.TestCase):
@@ -260,6 +267,38 @@ class WriteToMarkdownTestCase(unittest.TestCase):
             call.write("| https://github.com/example/repo1 | 30 |\n"),
         ]
         mock_file.__enter__.return_value.assert_has_calls(expected_calls)
+
+
+class OutputToJson(unittest.TestCase):
+    """
+    Unit test case for the output_to_json() function.
+    """
+
+    def test_output_to_json(self):
+        """Test that output_to_json returns the expected json string.
+
+        This test creates a list of inactive repos and calls the
+        output_to_json function with the list. It then checks that the
+        function returns the expected json string.
+
+        """
+        # Create a list of inactive repos
+        inactive_repos = [
+            ("https://github.com/example/repo1", 31),
+            ("https://github.com/example/repo2", 30),
+            ("https://github.com/example/repo3", 29),
+        ]
+
+        # Call the output_to_json function with the list of inactive repos
+        expected_json = json.dumps(
+            [
+                {"url": "https://github.com/example/repo1", "daysInactive": 31},
+                {"url": "https://github.com/example/repo2", "daysInactive": 30},
+                {"url": "https://github.com/example/repo3", "daysInactive": 29},
+            ]
+        )
+        actual_json = output_to_json(inactive_repos)
+        assert actual_json == expected_json
 
 
 if __name__ == "__main__":
