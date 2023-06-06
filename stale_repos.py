@@ -119,8 +119,9 @@ def output_to_json(inactive_repos):
     inactive_repos_json = []
     for repo_url, days_inactive in inactive_repos:
         inactive_repos_json.append({"url": repo_url, "daysInactive": days_inactive})
+    inactive_repos_json = json.dumps(inactive_repos_json)
 
-    print(f"::set-output name=inactiveRepos::{inactive_repos_json}")    
+    print(f"::set-output name=inactiveRepos::{inactive_repos_json}")
 
 def auth_to_github():
     """Connect to GitHub.com or GitHub Enterprise, depending on env variables."""
