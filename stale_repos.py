@@ -11,7 +11,7 @@ from dateutil.parser import parse
 from dotenv import load_dotenv
 
 
-def main():
+def main():  # pragma: no cover
     """
     Iterate over all repositories in the specified organization on GitHub,
     calculate the number of days since each repository was last pushed to,

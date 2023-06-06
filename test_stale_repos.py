@@ -205,20 +205,29 @@ class PrintInactiveReposTestCase(unittest.TestCase):
         exceed the specified threshold.
 
         """
-        github_connection = MagicMock()
+        mock_github = MagicMock()
+        mock_org = MagicMock()
 
         # Create a mock repository object with a last push time of 30 days ago
         thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
-        mock_repo = MagicMock()
-        mock_repo.pushed_at = thirty_days_ago.isoformat()
-        mock_repo.html_url = "https://github.com/example/repo"
-        github_connection.repositories_by.return_value = [mock_repo]
+        mock_repo1 = MagicMock()
+        mock_repo1.pushed_at = thirty_days_ago.isoformat()
+        mock_repo1.html_url = "https://github.com/example/repo"
+        mock_repo2 = MagicMock()
+        mock_repo2.pushed_at = None
+        mock_repo2.html_url = "https://github.com/example/repo2"
+
+        mock_github.organization.return_value = mock_org
+        mock_org.repositories.return_value = [
+            mock_repo1,
+            mock_repo2,
+        ]
 
         # Call the function with a threshold of 40 days
         inactive_days_threshold = 40
         organization = "example"
         with patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
-            get_inactive_repos(github_connection, inactive_days_threshold, organization)
+            get_inactive_repos(mock_github, inactive_days_threshold, organization)
             output = mock_stdout.getvalue()
 
         # Check that the output contains the expected repo URL and days inactive
