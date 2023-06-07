@@ -77,16 +77,33 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
     else:
         repos = github_connection.repositories(type="owner")
 
+    exempt_topics = os.getenv("EXEMPT_TOPICS")
+    if exempt_topics:
+        exempt_topics = exempt_topics.split(",")
+        print(f"Exempt topics: {exempt_topics}")
+
     for repo in repos:
+        # check if repo is exempt from stale repo check
+        if exempt_topics and any(
+            topic in exempt_topics for topic in repo.topics().names
+        ):
+            print(f"{repo.html_url} is exempt from stale repo check")
+            continue
+
+        # Get last push date
         last_push_str = repo.pushed_at  # type: ignore
         if last_push_str is None:
             continue
         last_push = parse(last_push_str)
+
         days_inactive = (datetime.now(timezone.utc) - last_push).days
         if days_inactive > int(inactive_days_threshold) and not repo.archived:
             inactive_repos.append((repo.html_url, days_inactive))
             print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
-    print(f"Found {len(inactive_repos)} stale repos in {organization}")
+    if organization:
+        print(f"Found {len(inactive_repos)} stale repos in {organization}")
+    else:
+        print(f"Found {len(inactive_repos)} stale repos")
     return inactive_repos
 
 
