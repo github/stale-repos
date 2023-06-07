@@ -85,7 +85,7 @@ The following repos have not had a push event for more than 3 days:
 
 ### Using JSON instead of Markdown
 
-The action outputs inactive repos in JSON format for further actions. 
+The action outputs inactive repos in JSON format for further actions as seen below or use the JSON contents from the file: `stale_repos.json`.
 
 Example usage:
 ```yaml
