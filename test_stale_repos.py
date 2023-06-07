@@ -308,6 +308,38 @@ class OutputToJson(unittest.TestCase):
         )
         actual_json = output_to_json(inactive_repos)
         assert actual_json == expected_json
+    
+    def test_json_file(self):
+        """Test that output_to_json writes JSON data to a file
+        
+        This test checks that output_to_json correctly writes its JSON data
+        to a file named "stale_repos.json"
+        """
+        # Create a list of inactive repos
+        inactive_repos = [
+            ("https://github.com/example/repo1", 31),
+            ("https://github.com/example/repo2", 30),
+            ("https://github.com/example/repo3", 29),
+        ]
+
+        # Call the output_to_json function with the list of inactive repos
+        expected_json = json.dumps(
+            [
+                {"url": "https://github.com/example/repo1", "daysInactive": 31},
+                {"url": "https://github.com/example/repo2", "daysInactive": 30},
+                {"url": "https://github.com/example/repo3", "daysInactive": 29},
+            ]
+        )
+
+        mock_file = MagicMock()
+         # Check that the mock file object was called with the expected data
+        expected_calls = [
+            call.write(expected_json),
+        ]
+
+        output_to_json(inactive_repos, mock_file)
+        mock_file.__enter__.return_value.assert_has_calls(expected_calls)
+        
 
 
 if __name__ == "__main__":
