@@ -423,10 +423,10 @@ class OutputToJson(unittest.TestCase):
         )
         actual_json = output_to_json(inactive_repos)
         assert actual_json == expected_json
-    
+
     def test_json_file(self):
         """Test that output_to_json writes JSON data to a file
-        
+
         This test checks that output_to_json correctly writes its JSON data
         to a file named "stale_repos.json"
         """
@@ -447,14 +447,13 @@ class OutputToJson(unittest.TestCase):
         )
 
         mock_file = MagicMock()
-         # Check that the mock file object was called with the expected data
+        # Check that the mock file object was called with the expected data
         expected_calls = [
             call.write(expected_json),
         ]
 
         output_to_json(inactive_repos, mock_file)
         mock_file.__enter__.return_value.assert_has_calls(expected_calls)
-        
 
 
 if __name__ == "__main__":

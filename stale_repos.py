@@ -157,13 +157,12 @@ def output_to_json(inactive_repos, file=None):
     if os.environ.get("GITHUB_OUTPUT"):
         with open(os.environ["GITHUB_OUTPUT"], "a") as file_handle:
             print(f"inactiveRepos={inactive_repos_json}", file=file_handle)
-    
-   
+
     with file or open("stale_repos.json", "w", encoding="utf-8") as file:
         file.write(inactive_repos_json)
-     
+
     print("Wrote stale repos to stale_repos.json")
-    
+
     return inactive_repos_json
 
 
