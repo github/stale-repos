@@ -31,7 +31,7 @@ Below are the allowed configuration options:
 | field                 | required | default | description |
 |-----------------------|----------|---------|-------------|
 | `GH_TOKEN`            | true     |         | The GitHub Token used to scan repositories. Must have read and write access to all repositories |
-| `ORGANIZATION`        | true     |         | The organization to scan for stale repositories |
+| `ORGANIZATION`        | false     |         | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner |
 | `INACTIVE_DAYS`       | true     |         | The number of days used to determine if repository is stale, based on `push` events |
 | `GH_ENTERPRISE_URL`   | false    | `""`    | URL of GitHub Enterprise instance to use for auth instead of github.com |
 
