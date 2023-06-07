@@ -1,4 +1,5 @@
 # Output files
+stale_repos.md
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

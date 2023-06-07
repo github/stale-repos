@@ -43,7 +43,9 @@ def main():  # pragma: no cover
     # Set the organization
     organization = os.getenv("ORGANIZATION")
     if not organization:
-        raise ValueError("ORGANIZATION environment variable not set")
+        print(
+            "ORGANIZATION environment variable not set, searching all repos owned by token owner"
+        )
 
     # Iterate over repos in the org, acquire inactive days,
     # and print out the repo url and days inactive if it's over the threshold (inactive_days)
@@ -70,9 +72,12 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
 
     """
     inactive_repos = []
-    org = github_connection.organization(organization)
+    if organization:
+        repos = github_connection.organization(organization).repositories()
+    else:
+        repos = github_connection.repositories(type="owner")
 
-    for repo in org.repositories():
+    for repo in repos:
         last_push_str = repo.pushed_at  # type: ignore
         if last_push_str is None:
             continue
