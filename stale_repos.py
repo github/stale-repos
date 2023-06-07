@@ -130,7 +130,9 @@ def output_to_json(inactive_repos):
         inactive_repos_json.append({"url": repo_url, "daysInactive": days_inactive})
     inactive_repos_json = json.dumps(inactive_repos_json)
 
-    print(f"::set-output name=inactiveRepos::{inactive_repos_json}")
+    # add output to github action output
+    with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+        print(f'inactiveRepos={inactive_repos_json}', file=fh)
     return inactive_repos_json
 
 
