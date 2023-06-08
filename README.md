@@ -134,6 +134,33 @@ jobs:
           }
         github-token: ${{ secrets.GH_TOKEN }}
 ```
+
+### Running against multiple organizations?
+
+You can utilize the GitHub Actions Matrix Strategy as shown below to run against multiple organizations. Note that this workflow example uses a manual trigger instead of a cron based trigger. Either works, this is just another option to consider.
+
+```yaml
+on:
+  - workflow_dispatch
+  
+name: Run the report
+
+jobs: 
+  report:
+    name: run report
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        org: [org1, org2]
+    steps:
+      - name: "run stale-repos"
+        uses: docker://ghcr.io/github/stale_repos:v1
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          ORGANIZATION: ${{ matrix.org }}
+          INACTIVE_DAYS: 365
+```
+
 ## Local usage without Docker
 
 1. Copy `.env-example` to `.env`
