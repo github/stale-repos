@@ -21,7 +21,7 @@ GitHub SLA's and support/services contracts do not apply to this repository.
 
 1. Create a repository to host this GitHub Action or select an existing repository.
 1. Create the env values from the sample workflow below (GH_TOKEN, ORGANIZATION, EXEMPT_TOPICS) with your information as plain text or repository secrets. More info on creating secrets can be found [here](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
-Note: Your GitHub token will need to have read/write access to all the repositories in the organization that you want evaluated
+Note: Your GitHub token will need to have read access to all the repositories in the organization that you want evaluated
 1. Copy the below example workflow to your repository and put it in the `.github/workflows/` directory with the file extension `.yml` (ie. `.github/workflows/stale_repos.yml`)
 
 ### Configuration
@@ -30,7 +30,7 @@ Below are the allowed configuration options:
 
 | field                 | required | default | description |
 |-----------------------|----------|---------|-------------|
-| `GH_TOKEN`            | true     |         | The GitHub Token used to scan repositories. Must have read and write access to all repositories |
+| `GH_TOKEN`            | true     |         | The GitHub Token used to scan repositories. Must have read access to all repositories you are interested in scanning. If you are writing to an issue, then the token you pass to that part of the workflow will need issue write permissions for repo where you run the workflow from. |
 | `ORGANIZATION`        | false    |         | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner |
 | `INACTIVE_DAYS`       | true     |         | The number of days used to determine if repository is stale, based on `push` events |
 | `EXEMPT_TOPICS`       | false    |         | Comma separated list of topics to exempt from being flagged as stale |
