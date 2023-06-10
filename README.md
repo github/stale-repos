@@ -30,7 +30,7 @@ Below are the allowed configuration options:
 
 | field                 | required | default | description |
 |-----------------------|----------|---------|-------------|
-| `GH_TOKEN`            | true     |         | The GitHub Token used to scan repositories. Must have read access to all repositories you are interested in scanning. If you are writing to an issue, then the token you pass to that part of the workflow will need issue write permissions for repo where you run the workflow from. |
+| `GH_TOKEN`            | true     |         | The GitHub Token used to scan repositories. Must have read access to all repositories you are interested in scanning |
 | `ORGANIZATION`        | false    |         | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner |
 | `INACTIVE_DAYS`       | true     |         | The number of days used to determine if repository is stale, based on `push` events |
 | `EXEMPT_TOPICS`       | false    |         | Comma separated list of topics to exempt from being flagged as stale |
@@ -52,9 +52,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
     - name: Run stale_repos tool
       uses: docker://ghcr.io/github/stale_repos:v1
       env:
@@ -69,7 +66,7 @@ jobs:
         title: Stale repository report
         content-filepath: ./stale_repos.md
         assignees: <YOUR_GITHUB_HANDLE_HERE>
-        token: ${{ secrets.GH_TOKEN }}
+        token: ${{ secrets.GITHUB_TOKEN }}
 
 ```
 
@@ -104,9 +101,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-
     - name: Run stale_repos tool
       id: stale-repos
       uses: docker://ghcr.io/github/stale_repos:v1
