@@ -53,7 +53,7 @@ jobs:
 
     steps:
     - name: Run stale_repos tool
-      uses: docker://ghcr.io/github/stale_repos:v1
+      uses: github/stale-repos@v1.4.0
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
         ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -103,7 +103,7 @@ jobs:
     steps:
     - name: Run stale_repos tool
       id: stale-repos
-      uses: docker://ghcr.io/github/stale_repos:v1
+      uses: github/stale-repos@v1.4.0
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
         ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -148,7 +148,7 @@ jobs:
         org: [org1, org2]
     steps:
       - name: "run stale-repos"
-        uses: docker://ghcr.io/github/stale_repos:v1
+        uses: github/stale-repos@v1.4.0
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ matrix.org }}
