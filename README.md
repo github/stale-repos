@@ -53,7 +53,7 @@ jobs:
 
     steps:
     - name: Run stale_repos tool
-      uses: github/stale-repos@v1.4.0
+      uses: github/stale-repos@v1
       env:
         GH_TOKEN: ${{ secrets.GH_TOKEN }}
         ORGANIZATION: ${{ secrets.ORGANIZATION }}
