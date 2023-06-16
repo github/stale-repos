@@ -1,4 +1,4 @@
-FROM python:3.8-slim-buster
+FROM python:3.11-slim
 LABEL org.opencontainers.image.source https://github.com/github/stale-repos
 
 WORKDIR /action/workspace
