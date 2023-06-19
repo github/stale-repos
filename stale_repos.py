@@ -95,10 +95,11 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
         if last_push_str is None:
             continue
         last_push = parse(last_push_str)
+        last_push_disp_date = parse(last_push_str).date().isoformat()
 
         days_inactive = (datetime.now(timezone.utc) - last_push).days
         if days_inactive > int(inactive_days_threshold) and not repo.archived:
-            inactive_repos.append((repo.html_url, days_inactive))
+            inactive_repos.append((repo.html_url, days_inactive, last_push_disp_date))
             print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
     if organization:
         print(f"Found {len(inactive_repos)} stale repos in {organization}")
@@ -123,10 +124,10 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
             f"The following repos have not had a push event for more than "
             f"{inactive_days_threshold} days:\n\n"
         )
-        file.write("| Repository URL | Days Inactive |\n")
-        file.write("| --- | ---: |\n")
-        for repo_url, days_inactive in inactive_repos:
-            file.write(f"| {repo_url} | {days_inactive} |\n")
+        file.write("| Repository URL | Days Inactive | Last Push Date |\n")
+        file.write("| --- | --- | ---: |\n")
+        for repo_url, days_inactive, last_push_date in inactive_repos:
+            file.write(f"| {repo_url} | {days_inactive} | {last_push_date} |\n")
     print("Wrote stale repos to stale_repos.md")
 
 
@@ -144,12 +145,14 @@ def output_to_json(inactive_repos, file=None):
     # [
     #   {
     #     "url": "https://github.com/owner/repo",
-    #     "daysInactive": 366
+    #     "daysInactive": 366,
+    #     "lastPushDate": "2020-01-01"
     #   }
     # ]
     inactive_repos_json = []
-    for repo_url, days_inactive in inactive_repos:
-        inactive_repos_json.append({"url": repo_url, "daysInactive": days_inactive})
+    for repo_url, days_inactive, last_push_date in inactive_repos:
+        inactive_repos_json.append({"url": repo_url, "daysInactive": days_inactive,
+                                    "lastPushDate": last_push_date})
     inactive_repos_json = json.dumps(inactive_repos_json)
 
     # add output to github action output
