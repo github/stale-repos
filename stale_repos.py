@@ -95,7 +95,7 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
         if last_push_str is None:
             continue
         last_push = parse(last_push_str)
-        last_push_disp_date = parse(last_push_str).date().isoformat()
+        last_push_disp_date = last_push.date().isoformat()
 
         days_inactive = (datetime.now(timezone.utc) - last_push).days
         if days_inactive > int(inactive_days_threshold) and not repo.archived:
