@@ -136,7 +136,8 @@ def output_to_json(inactive_repos, file=None):
     """Convert the list of inactive repos to a json string.
 
     Args:
-        inactive_repos: A list of tuples containing the repo, days inactive, and the date of the last push.
+        inactive_repos: A list of tuples containing the repo,
+            days inactive, and the date of the last push.
 
     Returns:
         JSON formatted string of the list of inactive repos.
@@ -152,8 +153,13 @@ def output_to_json(inactive_repos, file=None):
     # ]
     inactive_repos_json = []
     for repo_url, days_inactive, last_push_date in inactive_repos:
-        inactive_repos_json.append({"url": repo_url, "daysInactive": days_inactive,
-                                    "lastPushDate": last_push_date})
+        inactive_repos_json.append(
+            {
+                "url": repo_url,
+                "daysInactive": days_inactive,
+                "lastPushDate": last_push_date,
+            }
+        )
     inactive_repos_json = json.dumps(inactive_repos_json)
 
     # add output to github action output
