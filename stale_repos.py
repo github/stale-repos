@@ -112,7 +112,8 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
     """Write the list of inactive repos to a markdown file.
 
     Args:
-        inactive_repos: A list of tuples containing the repo and days inactive.
+        inactive_repos: A list of tuples containing the repo, days inactive,
+            and the date of the last push.
         inactive_days_threshold: The threshold (in days) for considering a repo as inactive.
         file: A file object to write to. If None, a new file will be created.
 
@@ -135,7 +136,7 @@ def output_to_json(inactive_repos, file=None):
     """Convert the list of inactive repos to a json string.
 
     Args:
-        inactive_repos: A list of tuples containing the repo and days inactive.
+        inactive_repos: A list of tuples containing the repo, days inactive, and the date of the last push.
 
     Returns:
         JSON formatted string of the list of inactive repos.
