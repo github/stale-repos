@@ -204,7 +204,7 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            ("https://github.com/example/repo2", 40),
+            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat()),
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -345,7 +345,7 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            ("https://github.com/example/repo2", 40),
+            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat()),
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -364,11 +364,16 @@ class WriteToMarkdownTestCase(unittest.TestCase):
         the mock file object was called with the expected data.
 
         """
-
+        forty_days_ago = datetime.now(timezone.utc) - timedelta(days=40)
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         # Create a list of inactive repos
         inactive_repos = [
-            ("https://github.com/example/repo2", 40),
-            ("https://github.com/example/repo1", 30),
+            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat()),
+            (
+                "https://github.com/example/repo1",
+                30,
+                thirty_days_ago.date().isoformat(),
+            ),
         ]
 
         inactive_days_threshold = 365
@@ -385,10 +390,16 @@ class WriteToMarkdownTestCase(unittest.TestCase):
             call.write(
                 "The following repos have not had a push event for more than 365 days:\n\n"
             ),
-            call.write("| Repository URL | Days Inactive |\n"),
-            call.write("| --- | ---: |\n"),
-            call.write("| https://github.com/example/repo2 | 40 |\n"),
-            call.write("| https://github.com/example/repo1 | 30 |\n"),
+            call.write("| Repository URL | Days Inactive | Last Push Date |\n"),
+            call.write("| --- | --- | ---: |\n"),
+            call.write(
+                f"| https://github.com/example/repo2 | 40 | "
+                f"{forty_days_ago.date().isoformat()} |\n"
+            ),
+            call.write(
+                f"| https://github.com/example/repo1 | 30 | "
+                f"{thirty_days_ago.date().isoformat()} |\n"
+            ),
         ]
         mock_file.__enter__.return_value.assert_has_calls(expected_calls)
 
@@ -406,19 +417,46 @@ class OutputToJson(unittest.TestCase):
         function returns the expected json string.
 
         """
+        thirty_one_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+        twenty_nine_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         # Create a list of inactive repos
         inactive_repos = [
-            ("https://github.com/example/repo1", 31),
-            ("https://github.com/example/repo2", 30),
-            ("https://github.com/example/repo3", 29),
+            (
+                "https://github.com/example/repo1",
+                31,
+                thirty_one_days_ago.date().isoformat(),
+            ),
+            (
+                "https://github.com/example/repo2",
+                30,
+                thirty_days_ago.date().isoformat(),
+            ),
+            (
+                "https://github.com/example/repo3",
+                29,
+                twenty_nine_days_ago.date().isoformat(),
+            ),
         ]
 
         # Call the output_to_json function with the list of inactive repos
         expected_json = json.dumps(
             [
-                {"url": "https://github.com/example/repo1", "daysInactive": 31},
-                {"url": "https://github.com/example/repo2", "daysInactive": 30},
-                {"url": "https://github.com/example/repo3", "daysInactive": 29},
+                {
+                    "url": "https://github.com/example/repo1",
+                    "daysInactive": 31,
+                    "lastPushDate": thirty_one_days_ago.date().isoformat(),
+                },
+                {
+                    "url": "https://github.com/example/repo2",
+                    "daysInactive": 30,
+                    "lastPushDate": thirty_days_ago.date().isoformat(),
+                },
+                {
+                    "url": "https://github.com/example/repo3",
+                    "daysInactive": 29,
+                    "lastPushDate": twenty_nine_days_ago.date().isoformat(),
+                },
             ]
         )
         actual_json = output_to_json(inactive_repos)
@@ -430,19 +468,46 @@ class OutputToJson(unittest.TestCase):
         This test checks that output_to_json correctly writes its JSON data
         to a file named "stale_repos.json"
         """
+        thirty_one_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+        twenty_nine_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         # Create a list of inactive repos
         inactive_repos = [
-            ("https://github.com/example/repo1", 31),
-            ("https://github.com/example/repo2", 30),
-            ("https://github.com/example/repo3", 29),
+            (
+                "https://github.com/example/repo1",
+                31,
+                thirty_one_days_ago.date().isoformat(),
+            ),
+            (
+                "https://github.com/example/repo2",
+                30,
+                thirty_days_ago.date().isoformat(),
+            ),
+            (
+                "https://github.com/example/repo3",
+                29,
+                twenty_nine_days_ago.date().isoformat(),
+            ),
         ]
 
         # Call the output_to_json function with the list of inactive repos
         expected_json = json.dumps(
             [
-                {"url": "https://github.com/example/repo1", "daysInactive": 31},
-                {"url": "https://github.com/example/repo2", "daysInactive": 30},
-                {"url": "https://github.com/example/repo3", "daysInactive": 29},
+                {
+                    "url": "https://github.com/example/repo1",
+                    "daysInactive": 31,
+                    "lastPushDate": thirty_one_days_ago.date().isoformat(),
+                },
+                {
+                    "url": "https://github.com/example/repo2",
+                    "daysInactive": 30,
+                    "lastPushDate": thirty_days_ago.date().isoformat(),
+                },
+                {
+                    "url": "https://github.com/example/repo3",
+                    "daysInactive": 29,
+                    "lastPushDate": twenty_nine_days_ago.date().isoformat(),
+                },
             ]
         )
 
