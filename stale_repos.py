@@ -68,7 +68,7 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
         organization: The name of the organization to retrieve repositories from.
 
     Returns:
-        A list of tuples containing the repo and days inactive.
+        A list of tuples containing the repo, days inactive, and the date of the last push.
 
     """
     inactive_repos = []
