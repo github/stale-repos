@@ -77,9 +77,9 @@ jobs:
 
 The following repos have not had a push event for more than 3 days:
 
-| Repository URL | Days Inactive |
-| --- | ---: |
-| https://github.com/github/.github | 5 |
+| Repository URL | Days Inactive | Last Push Date |
+| --- | ---: | ---: | 
+| https://github.com/github/.github | 5 | 2020-1-30 |
 ```
 
 ### Using JSON instead of Markdown
