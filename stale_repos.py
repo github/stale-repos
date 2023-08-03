@@ -53,9 +53,11 @@ def main():  # pragma: no cover
         github_connection, inactive_days_threshold, organization
     )
 
-    output_to_json(inactive_repos)
-    # Write the list of inactive repos to a csv file
-    write_to_markdown(inactive_repos, inactive_days_threshold)
+    if inactive_repos:
+        output_to_json(inactive_repos)
+        write_to_markdown(inactive_repos, inactive_days_threshold)
+    else:
+        print("No stale repos found")
 
 
 def get_inactive_repos(github_connection, inactive_days_threshold, organization):
