@@ -28,6 +28,7 @@ import github3.github
 from stale_repos import (
     auth_to_github,
     get_inactive_repos,
+    is_repo_exempt,
     output_to_json,
     write_to_markdown,
 )
@@ -519,6 +520,54 @@ class OutputToJson(unittest.TestCase):
 
         output_to_json(inactive_repos, mock_file)
         mock_file.__enter__.return_value.assert_has_calls(expected_calls)
+
+
+class TestIsRepoExempt(unittest.TestCase):
+    """
+    Test suite for the is_repo_exempt function.
+    """
+
+    def test_exempt_repos(self):
+        """
+        Test that a repo is exempt if its name is in the exempt_repos list.
+        """
+        repo = MagicMock(name="repo", spec=["name", "html_url"])
+        repo.name = "exempt_repo"
+        exempt_repos = ["exempt_repo"]
+        exempt_topics = []
+
+        result = is_repo_exempt(repo, exempt_repos, exempt_topics)
+
+        self.assertTrue(result)
+
+    def test_exempt_topics(self):
+        """
+        Test that a repo is exempt if one of its topics is in the exempt_topics list.
+        """
+        repo = MagicMock(name="repo", spec=["name", "html_url", "topics"])
+        repo.name = "not_exempt_repo"
+        repo.topics.return_value.names = ["exempt_topic"]
+        exempt_repos = []
+        exempt_topics = ["exempt_topic"]
+
+        result = is_repo_exempt(repo, exempt_repos, exempt_topics)
+
+        self.assertTrue(result)
+
+    def test_not_exempt(self):
+        """
+        Test that a repo is not exempt if it is not in the exempt_repos
+        list and none of its topics are in the exempt_topics list.
+        """
+        repo = MagicMock(name="repo", spec=["name", "html_url", "topics"])
+        repo.name = "not_exempt_repo"
+        repo.topics.return_value.names = ["not_exempt_topic"]
+        exempt_repos = ["exempt_repo"]
+        exempt_topics = ["exempt_topic"]
+
+        result = is_repo_exempt(repo, exempt_repos, exempt_topics)
+
+        self.assertFalse(result)
 
 
 if __name__ == "__main__":
