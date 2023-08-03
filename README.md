@@ -34,6 +34,7 @@ Below are the allowed configuration options:
 | `ORGANIZATION`        | false    |         | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner |
 | `INACTIVE_DAYS`       | true     |         | The number of days used to determine if repository is stale, based on `push` events |
 | `EXEMPT_TOPICS`       | false    |         | Comma separated list of topics to exempt from being flagged as stale |
+| `EXEMPT_REPOS`        | false    |         | Comma separated list of repositories to exempt from being flagged as stale. ie. `EXEMPT_TOPICS = "stale-repos,test-repo"` |
 | `GH_ENTERPRISE_URL`   | false    | `""`    | URL of GitHub Enterprise instance to use for auth instead of github.com |
 
 ### Example workflow

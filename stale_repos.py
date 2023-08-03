@@ -60,6 +60,26 @@ def main():  # pragma: no cover
         print("No stale repos found")
 
 
+def is_repo_exempt(repo, exempt_repos, exempt_topics):
+    """Check if a repo is exempt from the stale repo check.
+
+    Args:
+        repo: The repository to check.
+        exempt_repos: A list of repos to exempt from the stale repo check.
+        exempt_topics: A list of topics to exempt from the stale repo check.
+
+    Returns:
+        True if the repo is exempt from the stale repo check, False otherwise.
+    """
+    if exempt_repos and any(repo.name == exempt_repo for exempt_repo in exempt_repos):
+        print(f"{repo.html_url} is exempt from stale repo check")
+        return True
+    if exempt_topics and any(topic in exempt_topics for topic in repo.topics().names):
+        print(f"{repo.html_url} is exempt from stale repo check")
+        return True
+    return False
+
+
 def get_inactive_repos(github_connection, inactive_days_threshold, organization):
     """Return and print out the repo url and days inactive if it's over
        the threshold (inactive_days).
@@ -84,12 +104,14 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
         exempt_topics = exempt_topics.split(",")
         print(f"Exempt topics: {exempt_topics}")
 
+    exempt_repos = os.getenv("EXEMPT_REPOS")
+    if exempt_repos:
+        exempt_repos = exempt_repos.split(",")
+        print(f"Exempt repos: {exempt_repos}")
+
     for repo in repos:
         # check if repo is exempt from stale repo check
-        if exempt_topics and any(
-            topic in exempt_topics for topic in repo.topics().names
-        ):
-            print(f"{repo.html_url} is exempt from stale repo check")
+        if is_repo_exempt(repo, exempt_repos, exempt_topics):
             continue
 
         # Get last push date
