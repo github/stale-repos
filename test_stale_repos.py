@@ -569,6 +569,25 @@ class TestIsRepoExempt(unittest.TestCase):
 
         self.assertFalse(result)
 
+    def test_not_found_error(self):
+        """
+        Test that a repo is not exempt if a NotFoundError is raised
+        which happens for private temporary forks.
+        """
+        repo = MagicMock(name="repo", spec=["name", "html_url", "topics"])
+        repo.name = "not_exempt_repo"
+        repo.topics.side_effect = github3.exceptions.NotFoundError(
+            resp=MagicMock(status_code=404)
+        )
+        exempt_repos = []
+        exempt_topics = ["exempt_topic"]
+
+        result = is_repo_exempt(
+            repo=repo, exempt_repos=exempt_repos, exempt_topics=exempt_topics
+        )
+
+        self.assertFalse(result)
+
 
 if __name__ == "__main__":
     unittest.main()
