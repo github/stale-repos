@@ -74,9 +74,18 @@ def is_repo_exempt(repo, exempt_repos, exempt_topics):
     if exempt_repos and any(repo.name == exempt_repo for exempt_repo in exempt_repos):
         print(f"{repo.html_url} is exempt from stale repo check")
         return True
-    if exempt_topics and any(topic in exempt_topics for topic in repo.topics().names):
-        print(f"{repo.html_url} is exempt from stale repo check")
-        return True
+    try:
+        if exempt_topics and any(
+            topic in exempt_topics for topic in repo.topics().names
+        ):
+            print(f"{repo.html_url} is exempt from stale repo check")
+            return True
+    except github3.exceptions.NotFoundError as error_code:
+        if error_code.code == 404:
+            print(
+                f"{repo.html_url} does not have topics enabled and may be a private temporary fork"
+            )
+
     return False
 
 
