@@ -53,6 +53,8 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - uses: actions/checkout@v3
+
     - name: Run stale_repos tool
       uses: github/stale-repos@v1
       env:
@@ -61,9 +63,17 @@ jobs:
         EXEMPT_TOPICS: "keep,template"
         INACTIVE_DAYS: 365
 
+    - name: Check for the stale report issue
+      run: |
+        ISSUE_NUMBER=$(gh search issues "Stale repository report" --match title --json number --jq ".[0].number")
+        echo "issue_number=$ISSUE_NUMBER" >> "$GITHUB_ENV"
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Create issue
       uses: peter-evans/create-issue-from-file@v4
       with:
+        issue-number: ${{ env.issue_number }}
         title: Stale repository report
         content-filepath: ./stale_repos.md
         assignees: <YOUR_GITHUB_HANDLE_HERE>
