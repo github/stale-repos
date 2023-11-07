@@ -63,6 +63,7 @@ jobs:
         EXEMPT_TOPICS: "keep,template"
         INACTIVE_DAYS: 365
 
+    # This next step updates an existing issue. If you want a new issue every time, remove this step and remove the `issue-number: ${{ env.issue_number }}` line below.
     - name: Check for the stale report issue
       run: |
         ISSUE_NUMBER=$(gh search issues "Stale repository report" --match title --json number --jq ".[0].number")
