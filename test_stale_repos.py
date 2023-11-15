@@ -540,6 +540,7 @@ class TestIsRepoExempt(unittest.TestCase):
             ("conf-repo", ["exempt_repo", "conf-*"], True),
             ("conf", ["conf-*"], False),
             ("repo", ["repo1", "repo-"], False),
+            ("repo", [""], False),
         ]
 
         for repo_name, exempt_repos, expected_result in test_cases:
