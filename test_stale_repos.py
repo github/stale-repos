@@ -532,13 +532,24 @@ class TestIsRepoExempt(unittest.TestCase):
         Test that a repo is exempt if its name is in the exempt_repos list.
         """
         repo = MagicMock(name="repo", spec=["name", "html_url"])
-        repo.name = "exempt_repo"
-        exempt_repos = ["exempt_repo"]
         exempt_topics = []
 
-        result = is_repo_exempt(repo, exempt_repos, exempt_topics)
+        test_cases = [
+            ("exempt_repo", ["exempt_repo"], True),
+            ("data-repo", ["data-*", "conf-*"], True),
+            ("conf-repo", ["exempt_repo", "conf-*"], True),
+            ("conf", ["conf-*"], False),
+            ("repo", ["repo1", "repo-"], False),
+            ("repo", [""], False),
+        ]
 
-        self.assertTrue(result)
+        for repo_name, exempt_repos, expected_result in test_cases:
+            with self.subTest(repo_name=repo_name, exempt_repos=exempt_repos):
+                repo.name = repo_name
+                repo.html_url = repo_name
+
+                result = is_repo_exempt(repo, exempt_repos, exempt_topics)
+                self.assertEqual(result, expected_result)
 
     def test_exempt_topics(self):
         """

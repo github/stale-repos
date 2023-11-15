@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 """ Find stale repositories in a GitHub organization. """
-
+import fnmatch
 import json
 import os
 from datetime import datetime, timezone
@@ -71,7 +71,7 @@ def is_repo_exempt(repo, exempt_repos, exempt_topics):
     Returns:
         True if the repo is exempt from the stale repo check, False otherwise.
     """
-    if exempt_repos and any(repo.name == exempt_repo for exempt_repo in exempt_repos):
+    if exempt_repos and any(fnmatch.fnmatchcase(repo.name, pattern) for pattern in exempt_repos):
         print(f"{repo.html_url} is exempt from stale repo check")
         return True
     try:
