@@ -1,7 +1,7 @@
 ---
 name: 'stale-repos'
 author: 'github'
-description: 'A GitHub Action to identify stale repos within an organization that should be considered for archival.'
+description: 'A GitHub Action to identify stale repos within an organization'
 outputs:
   inactiveRepos:
     description: "Inactive Repos in the organization"
