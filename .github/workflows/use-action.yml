@@ -32,7 +32,7 @@ jobs:
           INACTIVE_DAYS: 1
 
       - name: Create issue
-        uses: peter-evans/create-issue-from-file@v4
+        uses: peter-evans/create-issue-from-file@v5
         with:
           title: Stale repository report
           content-filepath: ./stale_repos.md
