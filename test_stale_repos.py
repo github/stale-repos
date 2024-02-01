@@ -349,6 +349,72 @@ class GetInactiveReposTestCase(unittest.TestCase):
         ]
         assert inactive_repos == expected_inactive_repos
 
+    @patch.dict(os.environ, {"ACTIVITY_METHOD": "default_branch_updated"})
+    def test_get_inactive_repos_with_default_branch_updated(self):
+        """Test that get_inactive_repos works with alternative method.
+
+        This test uses a MagicMock object to simulate a GitHub API connection with a list
+        of repositories with varying levels of inactivity. It then calls the get_inactive_repos
+        function with the mock GitHub API connection, a threshold of 30 days, and the
+        default_branch_updated setting.  It mocks the branch method on the repo object to return
+        the necessary data for the active_date determination Finally, it checks that the function
+        returns the expected list of inactive repos.
+
+        """
+        # Create a MagicMock object to simulate a GitHub API connection
+        mock_github = MagicMock()
+
+        # Create a MagicMock object to simulate the organization object returned by the
+        # GitHub API connection
+        mock_org = MagicMock()
+
+        # Create MagicMock objects to simulate the repositories returned by the organization object
+        forty_days_ago = datetime.now(timezone.utc) - timedelta(days=40)
+        twenty_days_ago = datetime.now(timezone.utc) - timedelta(days=20)
+        mock_repo1 = MagicMock(
+            html_url="https://github.com/example/repo1",
+            default_branch="master",
+            archived=False,
+        )
+        mock_repo1.topics().names = []
+        mock_repo1.branch().commit.commit.as_dict = MagicMock(
+            return_value={"committer": {"date": twenty_days_ago.isoformat()}}
+        )
+        mock_repo2 = MagicMock(
+            html_url="https://github.com/example/repo2",
+            archived=False,
+        )
+        mock_repo2.topics().names = []
+        mock_repo2.branch().commit.commit.as_dict = MagicMock(
+            return_value={"committer": {"date": forty_days_ago.isoformat()}}
+        )
+        mock_repo3 = MagicMock(
+            html_url="https://github.com/example/repo3",
+            archived=True,
+        )
+        mock_repo3.topics().names = []
+        mock_repo3.branch().commit.commit.as_dict = MagicMock(
+            return_value={"committer": {"date": forty_days_ago.isoformat()}}
+        )
+
+        # Set up the MagicMock objects to return the expected values when called
+        mock_github.organization.return_value = mock_org
+        mock_org.repositories.return_value = [
+            mock_repo1,
+            mock_repo2,
+            mock_repo3,
+        ]
+
+        # Call the get_inactive_repos function with the mock GitHub API
+        # connection and a threshold of 30 days
+        inactive_repos = get_inactive_repos(mock_github, 30, "example")
+
+        # Check that the function returns the expected list of inactive repos
+        expected_inactive_repos = [
+            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat()),
+        ]
+        assert inactive_repos == expected_inactive_repos
+
 
 class WriteToMarkdownTestCase(unittest.TestCase):
     """

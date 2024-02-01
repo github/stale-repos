@@ -125,22 +125,48 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
         if is_repo_exempt(repo, exempt_repos, exempt_topics):
             continue
 
-        # Get last push date
-        last_push_str = repo.pushed_at  # type: ignore
-        if last_push_str is None:
+        # Get last active date
+        active_date = get_active_date(repo)
+        if active_date is None:
             continue
-        last_push = parse(last_push_str)
-        last_push_disp_date = last_push.date().isoformat()
 
-        days_inactive = (datetime.now(timezone.utc) - last_push).days
+        active_date_disp = active_date.date().isoformat()
+        days_inactive = (datetime.now(timezone.utc) - active_date).days
         if days_inactive > int(inactive_days_threshold) and not repo.archived:
-            inactive_repos.append((repo.html_url, days_inactive, last_push_disp_date))
+            inactive_repos.append((repo.html_url, days_inactive, active_date_disp))
             print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
     if organization:
         print(f"Found {len(inactive_repos)} stale repos in {organization}")
     else:
         print(f"Found {len(inactive_repos)} stale repos")
     return inactive_repos
+
+
+def get_active_date(repo):
+    """Get the last activity date of the repository.
+
+    Args:
+        repo: A Github repository object.
+
+    Returns:
+        A date object representing the last activity date of the repository.
+    """
+    activity_method = os.getenv("ACTIVITY_METHOD", "pushed")
+    if activity_method == "default_branch_updated":
+        commit = repo.branch(repo.default_branch).commit
+        active_date = parse(commit.commit.as_dict()['committer']['date'])
+    elif activity_method == "pushed":
+        last_push_str = repo.pushed_at  # type: ignored
+        if last_push_str is None:
+            return None
+        active_date = parse(last_push_str)
+    else:
+        raise ValueError(f"""
+                         ACTIVITY_METHOD environment variable has unsupported value: '{activity_method}'.
+                         Allowed values are: 'pushed' and 'default_branch_updated'
+                         """
+                         )
+    return active_date
 
 
 def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):

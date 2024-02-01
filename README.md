@@ -3,7 +3,7 @@
 
 This project identifies and reports repositories with no activity for configurable amount of time, in order to surface inactive repos to be considered for archival.
 The current approach assumes that the repos that you want to evaluate are available in a single GitHub organization.
-For the purpose of this action, a repository is considered inactive if it has not had a `push` in a configurable amount of days.
+For the purpose of this action, a repository is considered inactive if it has not had a `push` in a configurable amount of days (can also be configured to determine activity based on default branch).
 
 This action was developed by GitHub so that we can keep our open source projects well maintained, and it was made open source in the hopes that it would help you too!
 We are actively using and are archiving things in batches since there are many repositories on our report.
@@ -30,12 +30,13 @@ Below are the allowed configuration options:
 
 | field                 | required | default | description                                                                                                                                                          |
 |-----------------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `GH_TOKEN`            | true     |         | The GitHub Token used to scan repositories. Must have read access to all repositories you are interested in scanning                                                 |
-| `ORGANIZATION`        | false    |         | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner              |
-| `INACTIVE_DAYS`       | true     |         | The number of days used to determine if repository is stale, based on `push` events                                                                                  |
-| `EXEMPT_TOPICS`       | false    |         | Comma separated list of topics to exempt from being flagged as stale                                                                                                 |
-| `EXEMPT_REPOS`        | false    |         | Comma separated list of repositories to exempt from being flagged as stale. Supports Unix shell-style wildcards. ie. `EXEMPT_REPOS = "stale-repos,test-repo,conf-*"` |
-| `GH_ENTERPRISE_URL`   | false    | `""`    | URL of GitHub Enterprise instance to use for auth instead of github.com                                                                                              |
+| `GH_TOKEN`            | true     |            | The GitHub Token used to scan repositories. Must have read access to all repositories you are interested in scanning                                                 |
+| `ORGANIZATION`        | false    |            | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner              |
+| `INACTIVE_DAYS`       | true     |            | The number of days used to determine if repository is stale, based on `push` events                                                                                  |
+| `EXEMPT_TOPICS`       | false    |            | Comma separated list of topics to exempt from being flagged as stale                                                                                                 |
+| `EXEMPT_REPOS`        | false    |            | Comma separated list of repositories to exempt from being flagged as stale. Supports Unix shell-style wildcards. ie. `EXEMPT_REPOS = "stale-repos,test-repo,conf-*"` |
+| `GH_ENTERPRISE_URL`   | false    | `""`       | URL of GitHub Enterprise instance to use for auth instead of github.com                                                                                              |
+| `ACTIVITY_METHOD`     | false    | `"pushed"` | How to get the last active date of the repository. Defaults to `pushed`, which is the last time any branch had a push. Can also be set to `default_branch_updated` to instead measure from the latest commit on the default branch (good for filtering out dependabot )       |
 
 ### Example workflow
 
@@ -62,6 +63,7 @@ jobs:
         ORGANIZATION: ${{ secrets.ORGANIZATION }}
         EXEMPT_TOPICS: "keep,template"
         INACTIVE_DAYS: 365
+        ACTIVITY_METHOD: "pushed"
 
     # This next step updates an existing issue. If you want a new issue every time, remove this step and remove the `issue-number: ${{ env.issue_number }}` line below.
     - name: Check for the stale report issue
