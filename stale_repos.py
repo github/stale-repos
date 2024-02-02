@@ -151,7 +151,7 @@ def get_active_date(repo):
     Returns:
         A date object representing the last activity date of the repository.
     """
-    activity_method = os.getenv("ACTIVITY_METHOD", "pushed")
+    activity_method = os.getenv("ACTIVITY_METHOD", "pushed").lower()
     if activity_method == "default_branch_updated":
         commit = repo.branch(repo.default_branch).commit
         active_date = parse(commit.commit.as_dict()['committer']['date'])

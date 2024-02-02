@@ -3,7 +3,7 @@
 
 This project identifies and reports repositories with no activity for configurable amount of time, in order to surface inactive repos to be considered for archival.
 The current approach assumes that the repos that you want to evaluate are available in a single GitHub organization.
-For the purpose of this action, a repository is considered inactive if it has not had a `push` in a configurable amount of days (can also be configured to determine activity based on default branch).
+For the purpose of this action, a repository is considered inactive if it has not had a `push` in a configurable amount of days (can also be configured to determine activity based on default branch. See `ACTIVITY_METHOD` for more details.).
 
 This action was developed by GitHub so that we can keep our open source projects well maintained, and it was made open source in the hopes that it would help you too!
 We are actively using and are archiving things in batches since there are many repositories on our report.
