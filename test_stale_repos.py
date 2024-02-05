@@ -26,11 +26,11 @@ from unittest.mock import MagicMock, call, patch
 import github3.github
 from stale_repos import (
     auth_to_github,
+    get_active_date,
     get_inactive_repos,
     is_repo_exempt,
     output_to_json,
     write_to_markdown,
-    get_active_date,
 )
 
 
