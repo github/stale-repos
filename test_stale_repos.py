@@ -30,6 +30,7 @@ from stale_repos import (
     is_repo_exempt,
     output_to_json,
     write_to_markdown,
+    get_active_date,
 )
 
 
@@ -468,6 +469,29 @@ class WriteToMarkdownTestCase(unittest.TestCase):
             ),
         ]
         mock_file.__enter__.return_value.assert_has_calls(expected_calls)
+
+
+@patch.dict(os.environ, {"ACTIVITY_METHOD": "default_branch_updated"})
+class GetActiveDateTestCase(unittest.TestCase):
+    """
+    Unit test case for the get_active_date() function.
+
+    This test case class verifies that get_active_date will return None if
+    github3 throws any kind of exception.
+    """
+
+    def test_returns_none_for_exception(self):
+        """Test that get will return None if github3 throws any kind of exception."""
+        repo = MagicMock(
+            name="repo", default_branch="main", spec=["branch", "html_url"]
+        )
+
+        repo.branch.side_effect = github3.exceptions.NotFoundError(
+            resp=MagicMock(status_code=404)
+        )
+        result = get_active_date(repo)
+
+        assert result is None
 
 
 class OutputToJson(unittest.TestCase):
