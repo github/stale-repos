@@ -152,21 +152,25 @@ def get_active_date(repo):
         A date object representing the last activity date of the repository.
     """
     activity_method = os.getenv("ACTIVITY_METHOD", "pushed").lower()
-    if activity_method == "default_branch_updated":
-        commit = repo.branch(repo.default_branch).commit
-        active_date = parse(commit.commit.as_dict()["committer"]["date"])
-    elif activity_method == "pushed":
-        last_push_str = repo.pushed_at  # type: ignored
-        if last_push_str is None:
-            return None
-        active_date = parse(last_push_str)
-    else:
-        raise ValueError(
-            f"""
-                         ACTIVITY_METHOD environment variable has unsupported value: '{activity_method}'.
-                         Allowed values are: 'pushed' and 'default_branch_updated'
-                         """
-        )
+    try:
+        if activity_method == "default_branch_updated":
+            commit = repo.branch(repo.default_branch).commit
+            active_date = parse(commit.commit.as_dict()["committer"]["date"])
+        elif activity_method == "pushed":
+            last_push_str = repo.pushed_at  # type: ignored
+            if last_push_str is None:
+                return None
+            active_date = parse(last_push_str)
+        else:
+            raise ValueError(
+                f"""
+                ACTIVITY_METHOD environment variable has unsupported value: '{activity_method}'.
+                Allowed values are: 'pushed' and 'default_branch_updated'
+                """
+            )
+    except github3.exceptions.GitHubException:
+        print(f"{repo.html_url} had an exception trying to get the activity date.")
+        return None
     return active_date
 
 
