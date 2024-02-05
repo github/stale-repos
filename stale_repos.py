@@ -164,9 +164,9 @@ def get_active_date(repo):
         else:
             raise ValueError(
                 f"""
-                        ACTIVITY_METHOD environment variable has unsupported value: '{activity_method}'.
-                        Allowed values are: 'pushed' and 'default_branch_updated'
-                        """
+                ACTIVITY_METHOD environment variable has unsupported value: '{activity_method}'.
+                Allowed values are: 'pushed' and 'default_branch_updated'
+                """
             )
     except github3.exceptions.GitHubException:
         print(f"{repo.html_url} had an exception trying to get the activity date.")
