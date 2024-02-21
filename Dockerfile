@@ -19,5 +19,8 @@ RUN python3 -m pip install --no-cache-dir -r requirements.txt \
     && apt-get -y install --no-install-recommends git-all=1:2.39.2-1.1 \
     && rm -rf /var/lib/apt/lists/*
 
+RUN useradd -m appuser
+USER appuser
+
 CMD ["/action/workspace/stale_repos.py"]
 ENTRYPOINT ["python3", "-u"]
