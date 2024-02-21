@@ -1,3 +1,4 @@
+#checkov:skip=CKV_DOCKER_2
 FROM python:3.12-slim
 LABEL com.github.actions.name="stale-repos" \
     com.github.actions.description="Find stale repositories in a GitHub organization." \
