@@ -181,6 +181,13 @@ jobs:
 1. `pip install -r requirements.txt`
 1. Run `python3 ./stale_repos.py`, which will output a list of repositories and the length of their inactivity
 
+## Local testing without Docker
+
+1. Have Python v3.9 or greater installed
+1. `pip install -r requirements.txt -r requirements-test.txt`
+1. `make lint`
+1. `make test`
+
 ## License
 
 [MIT](LICENSE)
