@@ -488,6 +488,9 @@ class WriteToMarkdownTestCase(unittest.TestCase):
                 "The following repos have not had a push event for more than 365 days:\n\n"
             ),
             call.write("| Repository URL | Days Inactive | Last Push Date | Visibility |\n"),
+            call.write(
+                "| Repository URL | Days Inactive | Last Push Date | Visibility | "
+            ),
             call.write("| --- | --- | --- | ---: |\n"),
             call.write(
                 f"| https://github.com/example/repo2 | 40 | "
