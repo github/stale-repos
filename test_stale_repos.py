@@ -208,7 +208,12 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat(), "private"),
+            (
+                "https://github.com/example/repo2",
+                40,
+                forty_days_ago.date().isoformat(),
+                "private",
+            ),
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -352,7 +357,12 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat(), "private"),
+            (
+                "https://github.com/example/repo2",
+                40,
+                forty_days_ago.date().isoformat(),
+                "private",
+            ),
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -421,7 +431,12 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat(), "private"),
+            (
+                "https://github.com/example/repo2",
+                40,
+                forty_days_ago.date().isoformat(),
+                "private",
+            ),
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -444,7 +459,12 @@ class WriteToMarkdownTestCase(unittest.TestCase):
         thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         # Create a list of inactive repos
         inactive_repos = [
-            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat(), "public"),
+            (
+                "https://github.com/example/repo2",
+                40,
+                forty_days_ago.date().isoformat(),
+                "public",
+            ),
             (
                 "https://github.com/example/repo1",
                 30,

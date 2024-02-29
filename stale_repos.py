@@ -135,7 +135,9 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
         days_inactive = (datetime.now(timezone.utc) - active_date).days
         private = "private" if repo.private else "public"
         if days_inactive > int(inactive_days_threshold) and not repo.archived:
-            inactive_repos.append((repo.html_url, days_inactive, active_date_disp, private))
+            inactive_repos.append(
+                (repo.html_url, days_inactive, active_date_disp, private)
+            )
             print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
     if organization:
         print(f"Found {len(inactive_repos)} stale repos in {organization}")
@@ -196,7 +198,9 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
         file.write("| Repository URL | Days Inactive | Last Push Date | Visibility |\n")
         file.write("| --- | --- | --- | ---: |\n")
         for repo_url, days_inactive, last_push_date, private in inactive_repos:
-            file.write(f"| {repo_url} | {days_inactive} | {last_push_date} | {private} |\n")
+            file.write(
+                f"| {repo_url} | {days_inactive} | {last_push_date} | {private} |\n"
+            )
     print("Wrote stale repos to stale_repos.md")
 
 
