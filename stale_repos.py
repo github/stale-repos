@@ -101,7 +101,8 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
         organization: The name of the organization to retrieve repositories from.
 
     Returns:
-        A list of tuples containing the repo, days inactive, and the date of the last push.
+        A list of tuples containing the repo, days inactive, the date of the last push and
+        repository visibility (public/private).
 
     """
     inactive_repos = []
@@ -132,8 +133,11 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
 
         active_date_disp = active_date.date().isoformat()
         days_inactive = (datetime.now(timezone.utc) - active_date).days
+        visibility = "private" if repo.private else "public"
         if days_inactive > int(inactive_days_threshold) and not repo.archived:
-            inactive_repos.append((repo.html_url, days_inactive, active_date_disp))
+            inactive_repos.append(
+                (repo.html_url, days_inactive, active_date_disp, visibility)
+            )
             print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
     if organization:
         print(f"Found {len(inactive_repos)} stale repos in {organization}")
@@ -179,7 +183,7 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
 
     Args:
         inactive_repos: A list of tuples containing the repo, days inactive,
-            and the date of the last push.
+            the date of the last push, and repository visibility (public/private).
         inactive_days_threshold: The threshold (in days) for considering a repo as inactive.
         file: A file object to write to. If None, a new file will be created.
 
@@ -191,10 +195,12 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
             f"The following repos have not had a push event for more than "
             f"{inactive_days_threshold} days:\n\n"
         )
-        file.write("| Repository URL | Days Inactive | Last Push Date |\n")
-        file.write("| --- | --- | ---: |\n")
-        for repo_url, days_inactive, last_push_date in inactive_repos:
-            file.write(f"| {repo_url} | {days_inactive} | {last_push_date} |\n")
+        file.write("| Repository URL | Days Inactive | Last Push Date | Visibility |\n")
+        file.write("| --- | --- | --- | ---: |\n")
+        for repo_url, days_inactive, last_push_date, visibility in inactive_repos:
+            file.write(
+                f"| {repo_url} | {days_inactive} | {last_push_date} | {visibility} |\n"
+            )
     print("Wrote stale repos to stale_repos.md")
 
 
@@ -203,7 +209,8 @@ def output_to_json(inactive_repos, file=None):
 
     Args:
         inactive_repos: A list of tuples containing the repo,
-            days inactive, and the date of the last push.
+            days inactive, the date of the last push, and
+            visiblity of the repository (public/private).
 
     Returns:
         JSON formatted string of the list of inactive repos.
@@ -218,12 +225,13 @@ def output_to_json(inactive_repos, file=None):
     #   }
     # ]
     inactive_repos_json = []
-    for repo_url, days_inactive, last_push_date in inactive_repos:
+    for repo_url, days_inactive, last_push_date, visibility in inactive_repos:
         inactive_repos_json.append(
             {
                 "url": repo_url,
                 "daysInactive": days_inactive,
                 "lastPushDate": last_push_date,
+                "visibility": visibility,
             }
         )
     inactive_repos_json = json.dumps(inactive_repos_json)

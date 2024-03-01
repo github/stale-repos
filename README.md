@@ -1,4 +1,5 @@
 # Stale Repos Action
+
 (Used by the `github` organization!)
 
 This project identifies and reports repositories with no activity for configurable amount of time, in order to surface inactive repos to be considered for archival.
@@ -91,9 +92,9 @@ jobs:
 
 The following repos have not had a push event for more than 3 days:
 
-| Repository URL | Days Inactive | Last Push Date |
-| --- | ---: | ---: | 
-| https://github.com/github/.github | 5 | 2020-1-30 |
+| Repository URL | Days Inactive | Last Push Date | Visibility |
+| --- | ---: | ---: | ---: | 
+| https://github.com/github/.github | 5 | 2020-1-30 | private |
 ```
 
 ### Using JSON instead of Markdown
@@ -101,6 +102,7 @@ The following repos have not had a push event for more than 3 days:
 The action outputs inactive repos in JSON format for further actions as seen below or use the JSON contents from the file: `stale_repos.json`.
 
 Example usage:
+
 ```yaml
 name: stale repo identifier
 

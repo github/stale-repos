@@ -176,18 +176,21 @@ class GetInactiveReposTestCase(unittest.TestCase):
             html_url="https://github.com/example/repo1",
             pushed_at=twenty_days_ago.isoformat(),
             archived=False,
+            private=True,
         )
         mock_repo1.topics().names = []
         mock_repo2 = MagicMock(
             html_url="https://github.com/example/repo2",
             pushed_at=forty_days_ago.isoformat(),
             archived=False,
+            private=True,
         )
         mock_repo2.topics().names = []
         mock_repo3 = MagicMock(
             html_url="https://github.com/example/repo3",
             pushed_at=forty_days_ago.isoformat(),
             archived=True,
+            private=True,
         )
         mock_repo3.topics().names = []
 
@@ -205,7 +208,12 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat()),
+            (
+                "https://github.com/example/repo2",
+                40,
+                forty_days_ago.date().isoformat(),
+                "private",
+            ),
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -318,18 +326,21 @@ class GetInactiveReposTestCase(unittest.TestCase):
             html_url="https://github.com/example/repo1",
             pushed_at=twenty_days_ago.isoformat(),
             archived=False,
+            private=True,
         )
         mock_repo1.topics().names = []
         mock_repo2 = MagicMock(
             html_url="https://github.com/example/repo2",
             pushed_at=forty_days_ago.isoformat(),
             archived=False,
+            private=True,
         )
         mock_repo2.topics().names = []
         mock_repo3 = MagicMock(
             html_url="https://github.com/example/repo3",
             pushed_at=forty_days_ago.isoformat(),
             archived=True,
+            private=True,
         )
         mock_repo3.topics().names = []
 
@@ -346,7 +357,12 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat()),
+            (
+                "https://github.com/example/repo2",
+                40,
+                forty_days_ago.date().isoformat(),
+                "private",
+            ),
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -376,6 +392,7 @@ class GetInactiveReposTestCase(unittest.TestCase):
             html_url="https://github.com/example/repo1",
             default_branch="master",
             archived=False,
+            private=True,
         )
         mock_repo1.topics().names = []
         mock_repo1.branch().commit.commit.as_dict = MagicMock(
@@ -384,6 +401,7 @@ class GetInactiveReposTestCase(unittest.TestCase):
         mock_repo2 = MagicMock(
             html_url="https://github.com/example/repo2",
             archived=False,
+            private=True,
         )
         mock_repo2.topics().names = []
         mock_repo2.branch().commit.commit.as_dict = MagicMock(
@@ -392,6 +410,7 @@ class GetInactiveReposTestCase(unittest.TestCase):
         mock_repo3 = MagicMock(
             html_url="https://github.com/example/repo3",
             archived=True,
+            private=True,
         )
         mock_repo3.topics().names = []
         mock_repo3.branch().commit.commit.as_dict = MagicMock(
@@ -412,7 +431,12 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat()),
+            (
+                "https://github.com/example/repo2",
+                40,
+                forty_days_ago.date().isoformat(),
+                "private",
+            ),
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -435,11 +459,17 @@ class WriteToMarkdownTestCase(unittest.TestCase):
         thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         # Create a list of inactive repos
         inactive_repos = [
-            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat()),
+            (
+                "https://github.com/example/repo2",
+                40,
+                forty_days_ago.date().isoformat(),
+                "public",
+            ),
             (
                 "https://github.com/example/repo1",
                 30,
                 thirty_days_ago.date().isoformat(),
+                "private",
             ),
         ]
 
@@ -457,15 +487,19 @@ class WriteToMarkdownTestCase(unittest.TestCase):
             call.write(
                 "The following repos have not had a push event for more than 365 days:\n\n"
             ),
-            call.write("| Repository URL | Days Inactive | Last Push Date |\n"),
-            call.write("| --- | --- | ---: |\n"),
+            call.write(
+                "| Repository URL | Days Inactive | Last Push Date | Visibility |\n"
+            ),
+            call.write("| --- | --- | --- | ---: |\n"),
             call.write(
                 f"| https://github.com/example/repo2 | 40 | "
-                f"{forty_days_ago.date().isoformat()} |\n"
+                f"{forty_days_ago.date().isoformat()} | "
+                f"public |\n"
             ),
             call.write(
                 f"| https://github.com/example/repo1 | 30 | "
-                f"{thirty_days_ago.date().isoformat()} |\n"
+                f"{thirty_days_ago.date().isoformat()} | "
+                f"private |\n"
             ),
         ]
         mock_file.__enter__.return_value.assert_has_calls(expected_calls)
@@ -516,16 +550,19 @@ class OutputToJson(unittest.TestCase):
                 "https://github.com/example/repo1",
                 31,
                 thirty_one_days_ago.date().isoformat(),
+                "private",
             ),
             (
                 "https://github.com/example/repo2",
                 30,
                 thirty_days_ago.date().isoformat(),
+                "private",
             ),
             (
                 "https://github.com/example/repo3",
                 29,
                 twenty_nine_days_ago.date().isoformat(),
+                "public",
             ),
         ]
 
@@ -536,16 +573,19 @@ class OutputToJson(unittest.TestCase):
                     "url": "https://github.com/example/repo1",
                     "daysInactive": 31,
                     "lastPushDate": thirty_one_days_ago.date().isoformat(),
+                    "visibility": "private",
                 },
                 {
                     "url": "https://github.com/example/repo2",
                     "daysInactive": 30,
                     "lastPushDate": thirty_days_ago.date().isoformat(),
+                    "visibility": "private",
                 },
                 {
                     "url": "https://github.com/example/repo3",
                     "daysInactive": 29,
                     "lastPushDate": twenty_nine_days_ago.date().isoformat(),
+                    "visibility": "public",
                 },
             ]
         )
@@ -567,16 +607,19 @@ class OutputToJson(unittest.TestCase):
                 "https://github.com/example/repo1",
                 31,
                 thirty_one_days_ago.date().isoformat(),
+                "private",
             ),
             (
                 "https://github.com/example/repo2",
                 30,
                 thirty_days_ago.date().isoformat(),
+                "private",
             ),
             (
                 "https://github.com/example/repo3",
                 29,
                 twenty_nine_days_ago.date().isoformat(),
+                "public",
             ),
         ]
 
@@ -587,16 +630,19 @@ class OutputToJson(unittest.TestCase):
                     "url": "https://github.com/example/repo1",
                     "daysInactive": 31,
                     "lastPushDate": thirty_one_days_ago.date().isoformat(),
+                    "visibility": "private",
                 },
                 {
                     "url": "https://github.com/example/repo2",
                     "daysInactive": 30,
                     "lastPushDate": thirty_days_ago.date().isoformat(),
+                    "visibility": "private",
                 },
                 {
                     "url": "https://github.com/example/repo3",
                     "daysInactive": 29,
                     "lastPushDate": twenty_nine_days_ago.date().isoformat(),
+                    "visibility": "public",
                 },
             ]
         )
