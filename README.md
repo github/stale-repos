@@ -29,15 +29,18 @@ Note: Your GitHub token will need to have read access to all the repositories in
 
 Below are the allowed configuration options:
 
-| field                 | required | default | description                                                                                                                                                          |
-|-----------------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| `GH_TOKEN`            | true     |            | The GitHub Token used to scan repositories. Must have read access to all repositories you are interested in scanning                                                 |
-| `ORGANIZATION`        | false    |            | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner              |
-| `INACTIVE_DAYS`       | true     |            | The number of days used to determine if repository is stale, based on `push` events                                                                                  |
-| `EXEMPT_TOPICS`       | false    |            | Comma separated list of topics to exempt from being flagged as stale                                                                                                 |
-| `EXEMPT_REPOS`        | false    |            | Comma separated list of repositories to exempt from being flagged as stale. Supports Unix shell-style wildcards. ie. `EXEMPT_REPOS = "stale-repos,test-repo,conf-*"` |
-| `GH_ENTERPRISE_URL`   | false    | `""`       | URL of GitHub Enterprise instance to use for auth instead of github.com                                                                                              |
-| `ACTIVITY_METHOD`     | false    | `"pushed"` | How to get the last active date of the repository. Defaults to `pushed`, which is the last time any branch had a push. Can also be set to `default_branch_updated` to instead measure from the latest commit on the default branch (good for filtering out dependabot )       |
+| field                     | required | default | description                                                                                                                                                          |
+|---------------------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `ACTIVITY_METHOD`         | false    | `"pushed"` | How to get the last active date of the repository. Defaults to `pushed`, which is the last time any branch had a push. Can also be set to `default_branch_updated` to instead measure from the latest commit on the default branch (good for filtering out dependabot )       |
+| `GH_APP_ID`               | false    | `""`       | GitHub Application ID.                                                                                              |
+| `GH_APP_INSTALLATION_ID`  | false    | `""`       | GitHub Application Installation ID.                                                                                              |
+| `GH_APP_PRIVATE_KEY`      | false    | `""`       | GitHub Application Private Key                                                                                              |
+| `GH_ENTERPRISE_URL`       | false    | `""`       | URL of GitHub Enterprise instance to use for auth instead of github.com                                                                                              |
+| `GH_TOKEN`                | true     |            | The GitHub Token used to scan repositories. Must have read access to all repositories you are interested in scanning                                                 |
+| `INACTIVE_DAYS`           | true     |            | The number of days used to determine if repository is stale, based on `push` events                                                                                  |
+| `EXEMPT_REPOS`            | false    |            | Comma separated list of repositories to exempt from being flagged as stale. Supports Unix shell-style wildcards. ie. `EXEMPT_REPOS = "stale-repos,test-repo,conf-*"` |
+| `EXEMPT_TOPICS`           | false    |            | Comma separated list of topics to exempt from being flagged as stale                                                                                                 |
+| `ORGANIZATION`            | false    |            | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner              |
 
 ### Example workflow
 
@@ -169,6 +172,36 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ matrix.org }}
           INACTIVE_DAYS: 365
+```
+
+### Authenticating with a GitHub App and Installation
+
+You can authenticate as a GitHub App Installation by providing additional environment variables.
+
+```yaml
+on:
+  - workflow_dispatch
+
+name: Run the report
+
+jobs:
+  build:
+    name: stale repo identifier
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Run stale_repos tool
+      uses: github/stale-repos@v1
+      env:
+        GH_APP_ID: ${{ secrets.GH_APP_ID }}
+        GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
+        GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_PRIVATE_KEY }}
+        ORGANIZATION: ${{ secrets.ORGANIZATION }}
+        EXEMPT_TOPICS: "keep,template"
+        INACTIVE_DAYS: 365
+        ACTIVITY_METHOD: "pushed"
 ```
 
 ## Local usage without Docker
