@@ -250,11 +250,39 @@ def output_to_json(inactive_repos, file=None):
     return inactive_repos_json
 
 
+def get_int_env_var(env_var_name):
+    """Get an integer environment variable.
+
+    Args:
+        env_var_name: The name of the environment variable to retrieve.
+
+    Returns:
+        The value of the environment variable as an integer or None.
+    """
+    env_var = os.environ.get(env_var_name)
+    if env_var is None or not env_var.strip():
+        return None
+    try:
+        return int(env_var)
+    except ValueError:
+        return None
+
+
 def auth_to_github():
     """Connect to GitHub.com or GitHub Enterprise, depending on env variables."""
+    gh_app_id = get_int_env_var("GH_APP_ID")
+    gh_app_private_key_bytes = os.environ.get("GH_APP_PRIVATE_KEY", "").encode("utf8")
+    gh_app_installation_id = get_int_env_var("GH_APP_INSTALLATION_ID")
     ghe = os.getenv("GH_ENTERPRISE_URL", default="").strip()
     token = os.getenv("GH_TOKEN")
-    if ghe and token:
+
+    if gh_app_id and gh_app_private_key_bytes and gh_app_installation_id:
+        gh = github3.github.GitHub()
+        gh.login_as_app_installation(
+            gh_app_private_key_bytes, gh_app_id, gh_app_installation_id
+        )
+        github_connection = gh
+    elif ghe and token:
         github_connection = github3.github.GitHubEnterprise(ghe, token=token)
     elif token:
         github_connection = github3.login(token=os.getenv("GH_TOKEN"))
