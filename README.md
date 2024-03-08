@@ -176,7 +176,7 @@ jobs:
 
 ### Authenticating with a GitHub App and Installation
 
-You can authenticate as a GitHub App Installation by providing additional environment variables.
+You can authenticate as a GitHub App Installation by providing additional environment variables. If `GH_TOKEN` is set alongside these GitHub App Installation variables, the `GH_TOKEN` will be ignored and not used.
 
 ```yaml
 on:
