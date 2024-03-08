@@ -62,13 +62,14 @@ class AuthToGithubTestCase(unittest.TestCase):
     """
 
     @patch.dict(
-        os.environ, {
+        os.environ,
+        {
             "GH_APP_ID": "12345",
             "GH_APP_PRIVATE_KEY": "FakePrivateKey",
             "GH_APP_INSTALLATION_ID": "67890",
             "GH_ENTERPRISE_URL": "",
             "GH_TOKEN": ""
-        }
+        },
     )
     @patch("github3.github.GitHub.login_as_app_installation")
     def test_auth_to_github_app_with_github_app_installation_env_vars(self, mock_login):
@@ -85,13 +86,14 @@ class AuthToGithubTestCase(unittest.TestCase):
         self.assertIsInstance(connection, github3.github.GitHub)
 
     @patch.dict(
-        os.environ, {
+        os.environ,
+        {
             "GH_APP_ID": "",
             "GH_APP_PRIVATE_KEY": "",
             "GH_APP_INSTALLATION_ID": "",
             "GH_ENTERPRISE_URL": "https://example.com",
             "GH_TOKEN": "abc123"
-        }
+        },
     )
     def test_auth_to_github_with_enterprise_url_and_token(self):
         """
@@ -106,13 +108,14 @@ class AuthToGithubTestCase(unittest.TestCase):
         self.assertIsInstance(connection, github3.github.GitHubEnterprise)
 
     @patch.dict(
-        os.environ, {
+        os.environ,
+        {
             "GH_APP_ID": "",
             "GH_APP_PRIVATE_KEY": "",
             "GH_APP_INSTALLATION_ID": "",
             "GH_ENTERPRISE_URL": "",
             "GH_TOKEN": "abc123"
-        }
+        },
     )
     def test_auth_to_github_with_token(self):
         """
@@ -126,13 +129,14 @@ class AuthToGithubTestCase(unittest.TestCase):
         self.assertIsInstance(connection, github3.github.GitHub)
 
     @patch.dict(
-        os.environ, {
+        os.environ,
+        {
             "GH_APP_ID": "",
             "GH_APP_PRIVATE_KEY": "",
             "GH_APP_INSTALLATION_ID": "",
             "GH_ENTERPRISE_URL": "",
             "GH_TOKEN": ""
-        }
+        },
     )
     def test_auth_to_github_without_environment_variables(self):
         """
@@ -148,13 +152,14 @@ class AuthToGithubTestCase(unittest.TestCase):
         self.assertEqual(str(the_exception), 'GH_TOKEN environment variable not set')
 
     @patch.dict(
-        os.environ, {
+        os.environ,
+        {
             "GH_APP_ID": "",
             "GH_APP_PRIVATE_KEY": "",
             "GH_APP_INSTALLATION_ID": "",
             "GH_ENTERPRISE_URL": "",
             "GH_TOKEN": "abc123"
-        }
+        },
     )
     def test_auth_to_github_without_enterprise_url(self):
         """
@@ -180,13 +185,14 @@ class AuthToGithubTestCase(unittest.TestCase):
         """
         mock_login.return_value = None
         with patch.dict(
-            os.environ, {
+            os.environ,
+            {
                 "GH_APP_ID": "",
                 "GH_APP_PRIVATE_KEY": "",
                 "GH_APP_INSTALLATION_ID": "",
                 "GH_ENTERPRISE_URL": "",
                 "GH_TOKEN": "abc123"
-            }
+            },
         ):
             with self.assertRaises(ValueError) as cm:
                 auth_to_github()
