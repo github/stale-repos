@@ -113,12 +113,12 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
 
     exempt_topics = os.getenv("EXEMPT_TOPICS")
     if exempt_topics:
-        exempt_topics = exempt_topics.split(",")
+        exempt_topics = exempt_topics.replace(" ", "").split(",")
         print(f"Exempt topics: {exempt_topics}")
 
     exempt_repos = os.getenv("EXEMPT_REPOS")
     if exempt_repos:
-        exempt_repos = exempt_repos.split(",")
+        exempt_repos = exempt_repos.replace(" ", "").split(",")
         print(f"Exempt repos: {exempt_repos}")
 
     for repo in repos:
