@@ -242,8 +242,8 @@ def output_to_json(inactive_repos, file=None):
         with open(os.environ["GITHUB_OUTPUT"], "a") as file_handle:
             print(f"inactiveRepos={inactive_repos_json}", file=file_handle)
 
-    with file or open("stale_repos.json", "w", encoding="utf-8") as file:
-        file.write(inactive_repos_json)
+    with file or open("stale_repos.json", "w", encoding="utf-8") as json_file:
+        json_file.write(inactive_repos_json)
 
     print("Wrote stale repos to stale_repos.json")
 
