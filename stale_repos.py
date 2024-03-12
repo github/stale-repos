@@ -101,7 +101,8 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
         organization: The name of the organization to retrieve repositories from.
 
     Returns:
-        A list of tuples containing the repo, days inactive, and the date of the last push.
+        A list of tuples containing the repo, days inactive, the date of the last push and
+        repository visibility (public/private).
 
     """
     inactive_repos = []
@@ -112,12 +113,12 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
 
     exempt_topics = os.getenv("EXEMPT_TOPICS")
     if exempt_topics:
-        exempt_topics = exempt_topics.split(",")
+        exempt_topics = exempt_topics.replace(" ", "").split(",")
         print(f"Exempt topics: {exempt_topics}")
 
     exempt_repos = os.getenv("EXEMPT_REPOS")
     if exempt_repos:
-        exempt_repos = exempt_repos.split(",")
+        exempt_repos = exempt_repos.replace(" ", "").split(",")
         print(f"Exempt repos: {exempt_repos}")
 
     for repo in repos:
@@ -132,8 +133,11 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
 
         active_date_disp = active_date.date().isoformat()
         days_inactive = (datetime.now(timezone.utc) - active_date).days
+        visibility = "private" if repo.private else "public"
         if days_inactive > int(inactive_days_threshold) and not repo.archived:
-            inactive_repos.append((repo.html_url, days_inactive, active_date_disp))
+            inactive_repos.append(
+                (repo.html_url, days_inactive, active_date_disp, visibility)
+            )
             print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
     if organization:
         print(f"Found {len(inactive_repos)} stale repos in {organization}")
@@ -179,7 +183,7 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
 
     Args:
         inactive_repos: A list of tuples containing the repo, days inactive,
-            and the date of the last push.
+            the date of the last push, and repository visibility (public/private).
         inactive_days_threshold: The threshold (in days) for considering a repo as inactive.
         file: A file object to write to. If None, a new file will be created.
 
@@ -191,10 +195,12 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
             f"The following repos have not had a push event for more than "
             f"{inactive_days_threshold} days:\n\n"
         )
-        file.write("| Repository URL | Days Inactive | Last Push Date |\n")
-        file.write("| --- | --- | ---: |\n")
-        for repo_url, days_inactive, last_push_date in inactive_repos:
-            file.write(f"| {repo_url} | {days_inactive} | {last_push_date} |\n")
+        file.write("| Repository URL | Days Inactive | Last Push Date | Visibility |\n")
+        file.write("| --- | --- | --- | ---: |\n")
+        for repo_url, days_inactive, last_push_date, visibility in inactive_repos:
+            file.write(
+                f"| {repo_url} | {days_inactive} | {last_push_date} | {visibility} |\n"
+            )
     print("Wrote stale repos to stale_repos.md")
 
 
@@ -203,7 +209,8 @@ def output_to_json(inactive_repos, file=None):
 
     Args:
         inactive_repos: A list of tuples containing the repo,
-            days inactive, and the date of the last push.
+            days inactive, the date of the last push, and
+            visiblity of the repository (public/private).
 
     Returns:
         JSON formatted string of the list of inactive repos.
@@ -218,12 +225,13 @@ def output_to_json(inactive_repos, file=None):
     #   }
     # ]
     inactive_repos_json = []
-    for repo_url, days_inactive, last_push_date in inactive_repos:
+    for repo_url, days_inactive, last_push_date, visibility in inactive_repos:
         inactive_repos_json.append(
             {
                 "url": repo_url,
                 "daysInactive": days_inactive,
                 "lastPushDate": last_push_date,
+                "visibility": visibility,
             }
         )
     inactive_repos_json = json.dumps(inactive_repos_json)
@@ -242,11 +250,39 @@ def output_to_json(inactive_repos, file=None):
     return inactive_repos_json
 
 
+def get_int_env_var(env_var_name):
+    """Get an integer environment variable.
+
+    Args:
+        env_var_name: The name of the environment variable to retrieve.
+
+    Returns:
+        The value of the environment variable as an integer or None.
+    """
+    env_var = os.environ.get(env_var_name)
+    if env_var is None or not env_var.strip():
+        return None
+    try:
+        return int(env_var)
+    except ValueError:
+        return None
+
+
 def auth_to_github():
     """Connect to GitHub.com or GitHub Enterprise, depending on env variables."""
+    gh_app_id = get_int_env_var("GH_APP_ID")
+    gh_app_private_key_bytes = os.environ.get("GH_APP_PRIVATE_KEY", "").encode("utf8")
+    gh_app_installation_id = get_int_env_var("GH_APP_INSTALLATION_ID")
     ghe = os.getenv("GH_ENTERPRISE_URL", default="").strip()
     token = os.getenv("GH_TOKEN")
-    if ghe and token:
+
+    if gh_app_id and gh_app_private_key_bytes and gh_app_installation_id:
+        gh = github3.github.GitHub()
+        gh.login_as_app_installation(
+            gh_app_private_key_bytes, gh_app_id, gh_app_installation_id
+        )
+        github_connection = gh
+    elif ghe and token:
         github_connection = github3.github.GitHubEnterprise(ghe, token=token)
     elif token:
         github_connection = github3.login(token=os.getenv("GH_TOKEN"))

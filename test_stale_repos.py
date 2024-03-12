@@ -28,6 +28,7 @@ from stale_repos import (
     auth_to_github,
     get_active_date,
     get_inactive_repos,
+    get_int_env_var,
     is_repo_exempt,
     output_to_json,
     write_to_markdown,
@@ -47,6 +48,8 @@ class AuthToGithubTestCase(unittest.TestCase):
     and authentication failures.
 
     Test methods:
+        - test_auth_to_github_app_with_github_app_installation_env_vars: Tests authencation
+          to GitHub application with app ID, app private key, and app installation ID.
         - test_auth_to_github_with_enterprise_url_and_token: Tests authentication with both
           enterprise URL and token.
         - test_auth_to_github_with_token: Tests authentication with only a token.
@@ -59,7 +62,38 @@ class AuthToGithubTestCase(unittest.TestCase):
     """
 
     @patch.dict(
-        os.environ, {"GH_ENTERPRISE_URL": "https://example.com", "GH_TOKEN": "abc123"}
+        os.environ,
+        {
+            "GH_APP_ID": "12345",
+            "GH_APP_PRIVATE_KEY": "FakePrivateKey",
+            "GH_APP_INSTALLATION_ID": "67890",
+            "GH_ENTERPRISE_URL": "",
+            "GH_TOKEN": "",
+        },
+    )
+    @patch("github3.github.GitHub.login_as_app_installation")
+    def test_auth_to_github_app_with_github_app_installation_env_vars(self, mock_login):
+        """
+        Test authentication with both app id, app private key, and installation id.
+
+        This test verifies that when GH_APP_ID, GH_APP_PRIVATE_KEY, and GH_INSTALLATION_ID
+        environment variables are set, the auth_to_github() function returns a connection
+        object of type github3.github.GitHub.
+
+        """
+        mock_login.return_value = MagicMock()
+        connection = auth_to_github()
+        self.assertIsInstance(connection, github3.github.GitHub)
+
+    @patch.dict(
+        os.environ,
+        {
+            "GH_APP_ID": "",
+            "GH_APP_PRIVATE_KEY": "",
+            "GH_APP_INSTALLATION_ID": "",
+            "GH_ENTERPRISE_URL": "https://example.com",
+            "GH_TOKEN": "abc123",
+        },
     )
     def test_auth_to_github_with_enterprise_url_and_token(self):
         """
@@ -73,7 +107,16 @@ class AuthToGithubTestCase(unittest.TestCase):
         connection = auth_to_github()
         self.assertIsInstance(connection, github3.github.GitHubEnterprise)
 
-    @patch.dict(os.environ, {"GH_TOKEN": "abc123"})
+    @patch.dict(
+        os.environ,
+        {
+            "GH_APP_ID": "",
+            "GH_APP_PRIVATE_KEY": "",
+            "GH_APP_INSTALLATION_ID": "",
+            "GH_ENTERPRISE_URL": "",
+            "GH_TOKEN": "abc123",
+        },
+    )
     def test_auth_to_github_with_token(self):
         """
         Test authentication with only a token.
@@ -85,7 +128,16 @@ class AuthToGithubTestCase(unittest.TestCase):
         connection = auth_to_github()
         self.assertIsInstance(connection, github3.github.GitHub)
 
-    @patch.dict(os.environ, {"GH_ENTERPRISE_URL": "", "GH_TOKEN": ""})
+    @patch.dict(
+        os.environ,
+        {
+            "GH_APP_ID": "",
+            "GH_APP_PRIVATE_KEY": "",
+            "GH_APP_INSTALLATION_ID": "",
+            "GH_ENTERPRISE_URL": "",
+            "GH_TOKEN": "",
+        },
+    )
     def test_auth_to_github_without_environment_variables(self):
         """
         Test authentication with missing environment variables.
@@ -94,11 +146,22 @@ class AuthToGithubTestCase(unittest.TestCase):
         variables are empty, the auth_to_github() function raises a ValueError.
 
         """
-        with self.assertRaises(ValueError):
+        with self.assertRaises(ValueError) as cm:
             auth_to_github()
+        the_exception = cm.exception
+        self.assertEqual(str(the_exception), "GH_TOKEN environment variable not set")
 
-    @patch("github3.login")
-    def test_auth_to_github_without_enterprise_url(self, mock_login):
+    @patch.dict(
+        os.environ,
+        {
+            "GH_APP_ID": "",
+            "GH_APP_PRIVATE_KEY": "",
+            "GH_APP_INSTALLATION_ID": "",
+            "GH_ENTERPRISE_URL": "",
+            "GH_TOKEN": "abc123",
+        },
+    )
+    def test_auth_to_github_without_enterprise_url(self):
         """
         Test authentication without an enterprise URL.
 
@@ -107,10 +170,8 @@ class AuthToGithubTestCase(unittest.TestCase):
         a connection object of type github3.github.GitHub.
 
         """
-        mock_login.return_value = None
-        with patch.dict(os.environ, {"GH_ENTERPRISE_URL": "", "GH_TOKEN": "abc123"}):
-            with self.assertRaises(ValueError):
-                auth_to_github()
+        connection = auth_to_github()
+        self.assertIsInstance(connection, github3.github.GitHub)
 
     @patch("github3.login")
     def test_auth_to_github_authentication_failure(self, mock_login):
@@ -123,9 +184,63 @@ class AuthToGithubTestCase(unittest.TestCase):
 
         """
         mock_login.return_value = None
-        with patch.dict(os.environ, {"GH_ENTERPRISE_URL": "", "GH_TOKEN": "abc123"}):
-            with self.assertRaises(ValueError):
+        with patch.dict(
+            os.environ,
+            {
+                "GH_APP_ID": "",
+                "GH_APP_PRIVATE_KEY": "",
+                "GH_APP_INSTALLATION_ID": "",
+                "GH_ENTERPRISE_URL": "",
+                "GH_TOKEN": "abc123",
+            },
+        ):
+            with self.assertRaises(ValueError) as cm:
                 auth_to_github()
+            the_exception = cm.exception
+            self.assertEqual(str(the_exception), "Unable to authenticate to GitHub")
+
+
+class TestGetIntFromEnv(unittest.TestCase):
+    """
+    Test suite for the get_int_from_env function.
+
+    ...
+
+    Test methods:
+        - test_get_int_env_var: Test returns the expected integer value.
+        - test_get_int_env_var_with_empty_env_var: Test returns None when environment variable
+          is empty.
+        - test_get_int_env_var_with_non_integer: Test returns None when environment variable
+          is a non-integer.
+    """
+
+    @patch.dict(os.environ, {"INT_ENV_VAR": "12345"})
+    def test_get_int_env_var(self):
+        """
+        Test that get_int_env_var returns the expected integer value.
+        """
+        result = get_int_env_var("INT_ENV_VAR")
+        self.assertEqual(result, 12345)
+
+    @patch.dict(os.environ, {"INT_ENV_VAR": ""})
+    def test_get_int_env_var_with_empty_env_var(self):
+        """
+        This test verifies that the get_int_env_var function returns None
+        when the environment variable is empty.
+
+        """
+        result = get_int_env_var("INT_ENV_VAR")
+        self.assertIsNone(result)
+
+    @patch.dict(os.environ, {"INT_ENV_VAR": "not_an_int"})
+    def test_get_int_env_var_with_non_integer(self):
+        """
+        Test that get_int_env_var returns None when the environment variable is
+        a non-integer.
+
+        """
+        result = get_int_env_var("INT_ENV_VAR")
+        self.assertIsNone(result)
 
 
 class GetInactiveReposTestCase(unittest.TestCase):
@@ -176,18 +291,21 @@ class GetInactiveReposTestCase(unittest.TestCase):
             html_url="https://github.com/example/repo1",
             pushed_at=twenty_days_ago.isoformat(),
             archived=False,
+            private=True,
         )
         mock_repo1.topics().names = []
         mock_repo2 = MagicMock(
             html_url="https://github.com/example/repo2",
             pushed_at=forty_days_ago.isoformat(),
             archived=False,
+            private=True,
         )
         mock_repo2.topics().names = []
         mock_repo3 = MagicMock(
             html_url="https://github.com/example/repo3",
             pushed_at=forty_days_ago.isoformat(),
             archived=True,
+            private=True,
         )
         mock_repo3.topics().names = []
 
@@ -205,7 +323,12 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat()),
+            (
+                "https://github.com/example/repo2",
+                40,
+                forty_days_ago.date().isoformat(),
+                "private",
+            ),
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -318,18 +441,21 @@ class GetInactiveReposTestCase(unittest.TestCase):
             html_url="https://github.com/example/repo1",
             pushed_at=twenty_days_ago.isoformat(),
             archived=False,
+            private=True,
         )
         mock_repo1.topics().names = []
         mock_repo2 = MagicMock(
             html_url="https://github.com/example/repo2",
             pushed_at=forty_days_ago.isoformat(),
             archived=False,
+            private=True,
         )
         mock_repo2.topics().names = []
         mock_repo3 = MagicMock(
             html_url="https://github.com/example/repo3",
             pushed_at=forty_days_ago.isoformat(),
             archived=True,
+            private=True,
         )
         mock_repo3.topics().names = []
 
@@ -346,7 +472,12 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat()),
+            (
+                "https://github.com/example/repo2",
+                40,
+                forty_days_ago.date().isoformat(),
+                "private",
+            ),
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -376,6 +507,7 @@ class GetInactiveReposTestCase(unittest.TestCase):
             html_url="https://github.com/example/repo1",
             default_branch="master",
             archived=False,
+            private=True,
         )
         mock_repo1.topics().names = []
         mock_repo1.branch().commit.commit.as_dict = MagicMock(
@@ -384,6 +516,7 @@ class GetInactiveReposTestCase(unittest.TestCase):
         mock_repo2 = MagicMock(
             html_url="https://github.com/example/repo2",
             archived=False,
+            private=True,
         )
         mock_repo2.topics().names = []
         mock_repo2.branch().commit.commit.as_dict = MagicMock(
@@ -392,6 +525,7 @@ class GetInactiveReposTestCase(unittest.TestCase):
         mock_repo3 = MagicMock(
             html_url="https://github.com/example/repo3",
             archived=True,
+            private=True,
         )
         mock_repo3.topics().names = []
         mock_repo3.branch().commit.commit.as_dict = MagicMock(
@@ -412,7 +546,12 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat()),
+            (
+                "https://github.com/example/repo2",
+                40,
+                forty_days_ago.date().isoformat(),
+                "private",
+            ),
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -435,11 +574,17 @@ class WriteToMarkdownTestCase(unittest.TestCase):
         thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         # Create a list of inactive repos
         inactive_repos = [
-            ("https://github.com/example/repo2", 40, forty_days_ago.date().isoformat()),
+            (
+                "https://github.com/example/repo2",
+                40,
+                forty_days_ago.date().isoformat(),
+                "public",
+            ),
             (
                 "https://github.com/example/repo1",
                 30,
                 thirty_days_ago.date().isoformat(),
+                "private",
             ),
         ]
 
@@ -457,15 +602,19 @@ class WriteToMarkdownTestCase(unittest.TestCase):
             call.write(
                 "The following repos have not had a push event for more than 365 days:\n\n"
             ),
-            call.write("| Repository URL | Days Inactive | Last Push Date |\n"),
-            call.write("| --- | --- | ---: |\n"),
+            call.write(
+                "| Repository URL | Days Inactive | Last Push Date | Visibility |\n"
+            ),
+            call.write("| --- | --- | --- | ---: |\n"),
             call.write(
                 f"| https://github.com/example/repo2 | 40 | "
-                f"{forty_days_ago.date().isoformat()} |\n"
+                f"{forty_days_ago.date().isoformat()} | "
+                f"public |\n"
             ),
             call.write(
                 f"| https://github.com/example/repo1 | 30 | "
-                f"{thirty_days_ago.date().isoformat()} |\n"
+                f"{thirty_days_ago.date().isoformat()} | "
+                f"private |\n"
             ),
         ]
         mock_file.__enter__.return_value.assert_has_calls(expected_calls)
@@ -516,16 +665,19 @@ class OutputToJson(unittest.TestCase):
                 "https://github.com/example/repo1",
                 31,
                 thirty_one_days_ago.date().isoformat(),
+                "private",
             ),
             (
                 "https://github.com/example/repo2",
                 30,
                 thirty_days_ago.date().isoformat(),
+                "private",
             ),
             (
                 "https://github.com/example/repo3",
                 29,
                 twenty_nine_days_ago.date().isoformat(),
+                "public",
             ),
         ]
 
@@ -536,16 +688,19 @@ class OutputToJson(unittest.TestCase):
                     "url": "https://github.com/example/repo1",
                     "daysInactive": 31,
                     "lastPushDate": thirty_one_days_ago.date().isoformat(),
+                    "visibility": "private",
                 },
                 {
                     "url": "https://github.com/example/repo2",
                     "daysInactive": 30,
                     "lastPushDate": thirty_days_ago.date().isoformat(),
+                    "visibility": "private",
                 },
                 {
                     "url": "https://github.com/example/repo3",
                     "daysInactive": 29,
                     "lastPushDate": twenty_nine_days_ago.date().isoformat(),
+                    "visibility": "public",
                 },
             ]
         )
@@ -567,16 +722,19 @@ class OutputToJson(unittest.TestCase):
                 "https://github.com/example/repo1",
                 31,
                 thirty_one_days_ago.date().isoformat(),
+                "private",
             ),
             (
                 "https://github.com/example/repo2",
                 30,
                 thirty_days_ago.date().isoformat(),
+                "private",
             ),
             (
                 "https://github.com/example/repo3",
                 29,
                 twenty_nine_days_ago.date().isoformat(),
+                "public",
             ),
         ]
 
@@ -587,16 +745,19 @@ class OutputToJson(unittest.TestCase):
                     "url": "https://github.com/example/repo1",
                     "daysInactive": 31,
                     "lastPushDate": thirty_one_days_ago.date().isoformat(),
+                    "visibility": "private",
                 },
                 {
                     "url": "https://github.com/example/repo2",
                     "daysInactive": 30,
                     "lastPushDate": thirty_days_ago.date().isoformat(),
+                    "visibility": "private",
                 },
                 {
                     "url": "https://github.com/example/repo3",
                     "daysInactive": 29,
                     "lastPushDate": twenty_nine_days_ago.date().isoformat(),
+                    "visibility": "public",
                 },
             ]
         )
