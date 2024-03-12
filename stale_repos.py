@@ -195,7 +195,9 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
             f"The following repos have not had a push event for more than "
             f"{inactive_days_threshold} days:\n\n"
         )
-        markdown_file.write("| Repository URL | Days Inactive | Last Push Date | Visibility |\n")
+        markdown_file.write(
+            "| Repository URL | Days Inactive | Last Push Date | Visibility |\n"
+        )
         markdown_file.write("| --- | --- | --- | ---: |\n")
         for repo_url, days_inactive, last_push_date, visibility in inactive_repos:
             markdown_file.write(
