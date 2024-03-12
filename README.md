@@ -52,10 +52,17 @@ on:
   schedule:
     - cron: '3 2 1 * *'
 
+permissions:
+    contents: read
+
 jobs:
   build:
     name: stale repo identifier
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      issues: write
 
     steps:
     - uses: actions/checkout@v3
@@ -114,6 +121,9 @@ on:
   schedule:
     - cron: '3 2 1 * *'
 
+permissions:
+    contents: read
+
 jobs:
   build:
     name: stale repo identifier
@@ -158,6 +168,9 @@ on:
   
 name: Run the report
 
+permissions:
+    contents: read
+
 jobs: 
   report:
     name: run report
@@ -183,6 +196,9 @@ on:
   - workflow_dispatch
 
 name: Run the report
+
+permissions:
+    contents: read
 
 jobs:
   build:

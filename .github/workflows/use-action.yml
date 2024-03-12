@@ -12,25 +12,24 @@ on:
 
 permissions:
   contents: read
-  issues: write
-  packages: read
 
 jobs:
   build:
     name: stale repo identifier
     runs-on: ubuntu-latest
-
+    permissions:
+      contents: read
+      issues: write
+      packages: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
       - name: Run stale_repos tool
         uses: docker://ghcr.io/github/stale_repos:v1
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: github
           INACTIVE_DAYS: 1
-
       - name: Create issue
         uses: peter-evans/create-issue-from-file@v5
         with:
