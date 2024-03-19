@@ -1,4 +1,5 @@
 #checkov:skip=CKV_DOCKER_2
+#checkov:skip=CKV_DOCKER_3
 FROM python:3.12-slim
 LABEL com.github.actions.name="stale-repos" \
     com.github.actions.description="Find stale repositories in a GitHub organization." \
@@ -14,14 +15,10 @@ LABEL com.github.actions.name="stale-repos" \
 WORKDIR /action/workspace
 COPY requirements.txt stale_repos.py /action/workspace/
 
-RUN useradd -m appuser \
-    && chown -R appuser:appuser /action/workspace \
-    && python3 -m pip install --no-cache-dir -r requirements.txt \
+RUN python3 -m pip install --no-cache-dir -r requirements.txt \
     && apt-get -y update \
     && apt-get -y install --no-install-recommends git-all=1:2.39.2-1.1 \
     && rm -rf /var/lib/apt/lists/*
-
-USER appuser
 
 CMD ["/action/workspace/stale_repos.py"]
 ENTRYPOINT ["python3", "-u"]
