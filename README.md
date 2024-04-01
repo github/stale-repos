@@ -29,14 +29,30 @@ Note: Your GitHub token will need to have read access to all the repositories in
 
 Below are the allowed configuration options:
 
+#### Authentication
+
+This action can be configured to authenticate with GitHub App Installation or Personal Access Token (PAT). If all configuration options are provided, the GitHub App Installation configuration has precedence. You can choose one of the following methods to authenticate:
+
+##### GitHub App Installation
+
+| field                         | required | default | description |
+|-------------------------------|----------|---------|-------------|
+| `GH_APP_ID`                   | True     | `""`    | GitHub Application ID. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details. |
+| `GH_APP_INSTALLATION_ID`      | True     | `""`    | GitHub Application Installation ID. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details. |
+| `GH_APP_PRIVATE_KEY`          | True     | `""`    | GitHub Application Private Key. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details. |
+
+##### Personal Access Token (PAT)
+
+| field                         | required | default | description |
+|-------------------------------|----------|---------|-------------|
+| `GH_TOKEN`                    | True     | `""`    | The GitHub Token used to scan the repository. Must have read access to all repository you are interested in scanning. |
+
+#### Other Configuration Options
+
 | field                     | required | default | description                                                                                                                                                          |
 |---------------------------|----------|---------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `ACTIVITY_METHOD`         | false    | `"pushed"` | How to get the last active date of the repository. Defaults to `pushed`, which is the last time any branch had a push. Can also be set to `default_branch_updated` to instead measure from the latest commit on the default branch (good for filtering out dependabot )       |
-| `GH_APP_ID`               | false    | `""`       | GitHub Application ID.                                                                                              |
-| `GH_APP_INSTALLATION_ID`  | false    | `""`       | GitHub Application Installation ID.                                                                                              |
-| `GH_APP_PRIVATE_KEY`      | false    | `""`       | GitHub Application Private Key                                                                                              |
 | `GH_ENTERPRISE_URL`       | false    | `""`       | URL of GitHub Enterprise instance to use for auth instead of github.com                                                                                              |
-| `GH_TOKEN`                | true     |            | The GitHub Token used to scan repositories. Must have read access to all repositories you are interested in scanning                                                 |
 | `INACTIVE_DAYS`           | true     |            | The number of days used to determine if repository is stale, based on `push` events                                                                                  |
 | `EXEMPT_REPOS`            | false    |            | Comma separated list of repositories to exempt from being flagged as stale. Supports Unix shell-style wildcards. ie. `EXEMPT_REPOS = "stale-repos,test-repo,conf-*"` |
 | `EXEMPT_TOPICS`           | false    |            | Comma separated list of topics to exempt from being flagged as stale                                                                                                 |
