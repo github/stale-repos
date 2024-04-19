@@ -123,6 +123,8 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
 
     for repo in repos:
         # check if repo is exempt from stale repo check
+        if repo.archived:
+            continue
         if is_repo_exempt(repo, exempt_repos, exempt_topics):
             continue
 
@@ -134,7 +136,7 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
         active_date_disp = active_date.date().isoformat()
         days_inactive = (datetime.now(timezone.utc) - active_date).days
         visibility = "private" if repo.private else "public"
-        if days_inactive > int(inactive_days_threshold) and not repo.archived:
+        if days_inactive > int(inactive_days_threshold):
             inactive_repos.append(
                 (repo.html_url, days_inactive, active_date_disp, visibility)
             )
