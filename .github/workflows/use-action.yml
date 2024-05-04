@@ -31,7 +31,7 @@ jobs:
           ORGANIZATION: github
           INACTIVE_DAYS: 1
       - name: Create issue
-        uses: peter-evans/create-issue-from-file@v5
+        uses: peter-evans/create-issue-from-file@24452a72d85239eacf1468b0f1982a9f3fec4c94
         with:
           title: Stale repository report
           content-filepath: ./stale_repos.md
