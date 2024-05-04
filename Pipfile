@@ -1,0 +1,30 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[scripts]
+test = "make test"
+lint = "make lint"
+clean = "make clean"
+
+[packages]
+"github3.py" = "==4.0.1"
+pyjwt = "==2.8.0"
+python-dotenv = "==1.0.1"
+python-dateutil = "==2.9.0.post0"
+
+[dev-packages]
+black = "==24.4.2"
+dill = "==0.3.8"
+exceptiongroup = "==1.2.1"
+flake8 = "==7.0.0"
+mypy = "==1.10.0"
+mypy-extensions = "==1.0.0"
+pylint = "==3.1.0"
+pytest = "==8.2.0"
+pytest-cov = "==5.0.0"
+tomli = "==2.0.1"
+typing-extensions = "==4.11.0"
+types-python-dateutil = "==2.9.0.20240316"
+types-requests = "==2.31.0.20240406"

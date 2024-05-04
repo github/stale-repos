@@ -256,15 +256,19 @@ jobs:
 1. (Optional) Fill out the `.env` file with the [repository topics](https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/classifying-your-repository-with-topics) _exempt_topics_ that you want to filter out from the stale repos report. This should be a comma separated list of topics.
 1. (Optional) Fill out the `.env` file with the exact _organization_ that you want to search in
 1. (Optional) Fill out the `.env` file with the exact _URL_ of the GitHub Enterprise that you want to search in. Keep empty if you want to search in the  public `github.com`.
-1. `pip install -r requirements.txt`
+1. `python3 -m pip install pipenv==2023.12.1`
+1. `pipenv shell`
+1. `pipenv install`
 1. Run `python3 ./stale_repos.py`, which will output a list of repositories and the length of their inactivity
 
 ## Local testing without Docker
 
 1. Have Python v3.9 or greater installed
-1. `pip install -r requirements.txt -r requirements-test.txt`
-1. `make lint`
-1. `make test`
+1. `pip install pipenv==2023.12.1`
+1. `pipenv shell`
+1. `pipenv install --dev`
+1. `pipenv run lint`
+1. `pipenv run test`
 
 ## License
 
