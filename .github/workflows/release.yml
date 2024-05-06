@@ -62,7 +62,7 @@
             registry: ${{ env.REGISTRY }}
             username: ${{ github.actor }}
             password: ${{ secrets.GITHUB_TOKEN }}
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b
         - name: Push Docker Image
           if: ${{ success() }}
           uses: docker/build-push-action@2cdde995de11925a030ce8070c3d77a52ffcf1c0
