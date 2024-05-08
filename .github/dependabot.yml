@@ -1,21 +1,39 @@
 ---
 version: 2
 updates:
-  - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/" # Location of package manifests
+  - package-ecosystem: "pip"
+    directory: "/"
     schedule:
       interval: "daily"
     commit-message:
       prefix: "chore(deps)"
+    groups:
+      dependencies:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "daily"
     commit-message:
       prefix: "chore(deps)"
+    groups:
+      dependencies:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "daily"
     commit-message:
       prefix: "chore(deps)"
+    groups:
+      dependencies:
+        applies-to: version-updates
+        update-types:
+          - "minor"
+          - "patch"
