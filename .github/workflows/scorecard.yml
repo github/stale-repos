@@ -12,12 +12,30 @@ on:
     - cron: '29 11 * * 6'
   push:
     branches: ["main"]
+  pull_request:
+    branches: ["main"]
 
 permissions: read-all
 
 jobs:
-  analysis:
-    name: Scorecard analysis
+  pull-request-analysis:
+    if : github.event_name == 'pull_request'
+    name: Pull Request Scorecard analysis
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout code"
+        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11 # v4.1.1
+        with:
+          persist-credentials: false
+      - name: "Run analysis"
+        uses: ossf/scorecard-action@0864cf19026789058feabb7e87baa5f140aac736 # v2.3.1
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: false
+  merge-to-main-analysis:
+    if : github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Merge to Main Scorecard analysis
     runs-on: ubuntu-latest
     permissions:
       security-events: write

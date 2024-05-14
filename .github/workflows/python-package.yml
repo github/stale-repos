@@ -26,11 +26,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt -r requirements-test.txt
-      - name: Lint with flake8 and pylint
+          python -m pip install pip==24.0 --hash=sha256:ba0d021a166865d2265246961bec0152ff124de910c5cc39f1156ce3fa7c69dc \
+            pipenv==2023.12.1 --hash=sha256:96c8af7c36691fbc648959f3f631954212398246c8cfcfa529ec09bc5d0bfd01
+          pipenv install --deploy --dev --system
+      - name: Lint with super-linter
         run: |
-          make lint
+          pipenv run lint
       - name: Test with pytest
         run: |
-          make test
+          pipenv run test
