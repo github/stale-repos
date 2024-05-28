@@ -2,7 +2,7 @@
 # Stale Repos Action
 
 [![Lint Code Base](https://github.com/github/stale-repos/actions/workflows/linter.yaml/badge.svg)](https://github.com/github/stale-repos/actions/workflows/linter.yaml)
-[![CodeQL](https://github.com/github/stale-repos/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/github/stale-repos/actions/workflows/codeql-analysis.yml)
+[![CodeQL](https://github.com/github/stale-repos/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/github/stale-repos/actions/workflows/github-code-scanning/codeql)
 [![Docker Image CI](https://github.com/github/stale-repos/actions/workflows/docker-image.yml/badge.svg)](https://github.com/github/stale-repos/actions/workflows/docker-image.yml)
 [![Python CI](https://github.com/github/stale-repos/actions/workflows/python-package.yml/badge.svg)](https://github.com/github/stale-repos/actions/workflows/python-package.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/github/stale-repos/badge)](https://scorecard.dev/viewer/?uri=github.com/github/stale-repos)
