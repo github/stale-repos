@@ -1,4 +1,3 @@
-
 # Stale Repos Action
 
 [![Lint Code Base](https://github.com/github/stale-repos/actions/workflows/linter.yaml/badge.svg)](https://github.com/github/stale-repos/actions/workflows/linter.yaml)
@@ -68,6 +67,7 @@ This action can be configured to authenticate with GitHub App Installation or Pe
 | `EXEMPT_REPOS`            | false    |            | Comma separated list of repositories to exempt from being flagged as stale. Supports Unix shell-style wildcards. ie. `EXEMPT_REPOS = "stale-repos,test-repo,conf-*"` |
 | `EXEMPT_TOPICS`           | false    |            | Comma separated list of topics to exempt from being flagged as stale                                                                                                 |
 | `ORGANIZATION`            | false    |            | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner              |
+| `ADDITIONAL_METRICS`      | false    |            | Configure additional metrics like days since last release or days since last pull request. This allows for more detailed reporting on repository activity. To include both metrics, set `ADDITIONAL_METRICS: "release,pr"` |
 
 ### Example workflow
 
@@ -102,6 +102,7 @@ jobs:
         EXEMPT_TOPICS: "keep,template"
         INACTIVE_DAYS: 365
         ACTIVITY_METHOD: "pushed"
+        ADDITIONAL_METRICS: "release,pr"
 
     # This next step updates an existing issue. If you want a new issue every time, remove this step and remove the `issue-number: ${{ env.issue_number }}` line below.
     - name: Check for the stale report issue
@@ -129,9 +130,9 @@ jobs:
 
 The following repos have not had a push event for more than 3 days:
 
-| Repository URL | Days Inactive | Last Push Date | Visibility |
-| --- | ---: | ---: | ---: | 
-| https://github.com/github/.github | 5 | 2020-1-30 | private |
+| Repository URL | Days Inactive | Last Push Date | Visibility | Days Since Last Release | Days Since Last PR |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| https://github.com/github/.github | 5 | 2020-1-30 | private | 10 | 7 |
 ```
 
 ### Using JSON instead of Markdown
@@ -165,6 +166,7 @@ jobs:
         ORGANIZATION: ${{ secrets.ORGANIZATION }}
         EXEMPT_TOPICS: "keep,template"
         INACTIVE_DAYS: 365
+        ADDITIONAL_METRICS: "release,pr"
 
     - name: Print output of stale_repos tool
       run: echo "${{ steps.stale-repos.outputs.inactiveRepos }}"
@@ -212,6 +214,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ matrix.org }}
           INACTIVE_DAYS: 365
+          ADDITIONAL_METRICS: "release,pr"
 ```
 
 ### Authenticating with a GitHub App and Installation
@@ -245,6 +248,7 @@ jobs:
         EXEMPT_TOPICS: "keep,template"
         INACTIVE_DAYS: 365
         ACTIVITY_METHOD: "pushed"
+        ADDITIONAL_METRICS: "release,pr"
 ```
 
 ## Local usage without Docker
