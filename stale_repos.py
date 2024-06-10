@@ -47,15 +47,18 @@ def main():  # pragma: no cover
             "ORGANIZATION environment variable not set, searching all repos owned by token owner"
         )
 
+    # Fetch additional metrics configuration
+    additional_metrics = os.getenv("ADDITIONAL_METRICS", "").split(",")
+
     # Iterate over repos in the org, acquire inactive days,
     # and print out the repo url and days inactive if it's over the threshold (inactive_days)
     inactive_repos = get_inactive_repos(
-        github_connection, inactive_days_threshold, organization
+        github_connection, inactive_days_threshold, organization, additional_metrics
     )
 
     if inactive_repos:
         output_to_json(inactive_repos)
-        write_to_markdown(inactive_repos, inactive_days_threshold)
+        write_to_markdown(inactive_repos, inactive_days_threshold, additional_metrics)
     else:
         print("No stale repos found")
 
@@ -91,7 +94,9 @@ def is_repo_exempt(repo, exempt_repos, exempt_topics):
     return False
 
 
-def get_inactive_repos(github_connection, inactive_days_threshold, organization):
+def get_inactive_repos(
+    github_connection, inactive_days_threshold, organization, additional_metrics=None
+):
     """Return and print out the repo url and days inactive if it's over
        the threshold (inactive_days).
 
@@ -99,6 +104,7 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
         github_connection: The GitHub connection object.
         inactive_days_threshold: The threshold (in days) for considering a repo as inactive.
         organization: The name of the organization to retrieve repositories from.
+        additional_metrics: A list of additional metrics to include in the report.
 
     Returns:
         A list of tuples containing the repo, days inactive, the date of the last push and
@@ -137,15 +143,47 @@ def get_inactive_repos(github_connection, inactive_days_threshold, organization)
         days_inactive = (datetime.now(timezone.utc) - active_date).days
         visibility = "private" if repo.private else "public"
         if days_inactive > int(inactive_days_threshold):
-            inactive_repos.append(
-                (repo.html_url, days_inactive, active_date_disp, visibility)
+            repo_data = set_repo_data(
+                repo, days_inactive, active_date_disp, visibility, additional_metrics
             )
-            print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
+            inactive_repos.append(repo_data)
     if organization:
         print(f"Found {len(inactive_repos)} stale repos in {organization}")
     else:
         print(f"Found {len(inactive_repos)} stale repos")
     return inactive_repos
+
+
+def get_days_since_last_release(repo):
+    """Get the number of days since the last release of the repository.
+
+    Args:
+        repo: A Github repository object.
+
+    Returns:
+        The number of days since the last release.
+    """
+    try:
+        last_release = next(repo.releases())
+        return (datetime.now(timezone.utc) - last_release.created_at).days
+    except StopIteration:
+        return None
+
+
+def get_days_since_last_pr(repo):
+    """Get the number of days since the last pull request was made in the repository.
+
+    Args:
+        repo: A Github repository object.
+
+    Returns:
+        The number of days since the last pull request was made.
+    """
+    try:
+        last_pr = next(repo.pull_requests(state="all"))
+        return (datetime.now(timezone.utc) - last_pr.created_at).days
+    except StopIteration:
+        return None
 
 
 def get_active_date(repo):
@@ -180,17 +218,23 @@ def get_active_date(repo):
     return active_date
 
 
-def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
+def write_to_markdown(
+    inactive_repos, inactive_days_threshold, additional_metrics=None, file=None
+):
     """Write the list of inactive repos to a markdown file.
 
     Args:
-        inactive_repos: A list of tuples containing the repo, days inactive,
-            the date of the last push, and repository visibility (public/private).
+        inactive_repos: A list of dictionaries containing the repo, days inactive,
+            the date of the last push, repository visibility (public/private),
+            days since the last release, and days since the last pr
         inactive_days_threshold: The threshold (in days) for considering a repo as inactive.
+        additional_metrics: A list of additional metrics to include in the report.
         file: A file object to write to. If None, a new file will be created.
 
     """
-    inactive_repos.sort(key=lambda x: x[1], reverse=True)
+    inactive_repos = sorted(
+        inactive_repos, key=lambda x: x["days_inactive"], reverse=True
+    )
     with file or open("stale_repos.md", "w", encoding="utf-8") as markdown_file:
         markdown_file.write("# Inactive Repositories\n\n")
         markdown_file.write(
@@ -198,13 +242,33 @@ def write_to_markdown(inactive_repos, inactive_days_threshold, file=None):
             f"{inactive_days_threshold} days:\n\n"
         )
         markdown_file.write(
-            "| Repository URL | Days Inactive | Last Push Date | Visibility |\n"
+            "| Repository URL | Days Inactive | Last Push Date | Visibility |"
         )
-        markdown_file.write("| --- | --- | --- | ---: |\n")
-        for repo_url, days_inactive, last_push_date, visibility in inactive_repos:
+        # Include additional metrics columns if configured
+        if additional_metrics:
+            if "release" in additional_metrics:
+                markdown_file.write(" Days Since Last Release |")
+            if "pr" in additional_metrics:
+                markdown_file.write(" Days Since Last PR |")
+        markdown_file.write("\n| --- | --- | --- | ---: |")
+        if additional_metrics and (
+            "release" in additional_metrics or "pr" in additional_metrics
+        ):
+            markdown_file.write(" ---: |")
+        markdown_file.write("\n")
+        for repo_data in inactive_repos:
             markdown_file.write(
-                f"| {repo_url} | {days_inactive} | {last_push_date} | {visibility} |\n"
+                f"| {repo_data['url']} \
+| {repo_data['days_inactive']} \
+| {repo_data['last_push_date']} \
+| {repo_data['visibility']} |"
             )
+            if additional_metrics:
+                if "release" in additional_metrics:
+                    markdown_file.write(f" {repo_data['days_since_last_release']} |")
+                if "pr" in additional_metrics:
+                    markdown_file.write(f" {repo_data['days_since_last_pr']} |")
+            markdown_file.write("\n")
     print("Wrote stale repos to stale_repos.md")
 
 
@@ -212,9 +276,10 @@ def output_to_json(inactive_repos, file=None):
     """Convert the list of inactive repos to a json string.
 
     Args:
-        inactive_repos: A list of tuples containing the repo,
-            days inactive, the date of the last push, and
-            visiblity of the repository (public/private).
+        inactive_repos: A list of dictionaries containing the repo,
+            days inactive, the date of the last push,
+            visiblity of the repository (public/private),
+            days since the last release, and days since the last pr.
 
     Returns:
         JSON formatted string of the list of inactive repos.
@@ -226,18 +291,23 @@ def output_to_json(inactive_repos, file=None):
     #     "url": "https://github.com/owner/repo",
     #     "daysInactive": 366,
     #     "lastPushDate": "2020-01-01"
+    #     "daysSinceLastRelease": "5"
+    #     "daysSinceLastPR": "10"
     #   }
     # ]
     inactive_repos_json = []
-    for repo_url, days_inactive, last_push_date, visibility in inactive_repos:
-        inactive_repos_json.append(
-            {
-                "url": repo_url,
-                "daysInactive": days_inactive,
-                "lastPushDate": last_push_date,
-                "visibility": visibility,
-            }
-        )
+    for repo_data in inactive_repos:
+        repo_json = {
+            "url": repo_data["url"],
+            "daysInactive": repo_data["days_inactive"],
+            "lastPushDate": repo_data["last_push_date"],
+            "visibility": repo_data["visibility"],
+        }
+        if "release" in repo_data:
+            repo_json["daysSinceLastRelease"] = repo_data["days_since_last_release"]
+        if "pr" in repo_data:
+            repo_json["daysSinceLastPR"] = repo_data["days_since_last_pr"]
+        inactive_repos_json.append(repo_json)
     inactive_repos_json = json.dumps(inactive_repos_json)
 
     # add output to github action output
@@ -296,6 +366,42 @@ def auth_to_github():
     if not github_connection:
         raise ValueError("Unable to authenticate to GitHub")
     return github_connection  # type: ignore
+
+
+def set_repo_data(
+    repo, days_inactive, active_date_disp, visibility, additional_metrics
+):
+    """
+    Constructs a dictionary with repository data
+    including optional metrics based on additional metrics specified.
+
+    Args:
+        repo: The repository object.
+        days_inactive: Number of days the repository has been inactive.
+        active_date_disp: The display string of the last active date.
+        visibility: The visibility status of the repository (e.g., private or public).
+        additional_metrics: A list of strings indicating which additional metrics to include.
+
+    Returns:
+        A dictionary with the repository data.
+    """
+    repo_data = {
+        "url": repo.html_url,
+        "days_inactive": days_inactive,
+        "last_push_date": active_date_disp,
+        "visibility": visibility,
+    }
+    # Fetch and include additional metrics if configured
+    repo_data["days_since_last_release"] = None
+    repo_data["days_since_last_pr"] = None
+    if additional_metrics:
+        if "release" in additional_metrics:
+            repo_data["days_since_last_release"] = get_days_since_last_release(repo)
+        if "pr" in additional_metrics:
+            repo_data["days_since_last_pr"] = get_days_since_last_pr(repo)
+
+    print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
+    return repo_data
 
 
 if __name__ == "__main__":

@@ -27,6 +27,8 @@ import github3.github
 from stale_repos import (
     auth_to_github,
     get_active_date,
+    get_days_since_last_pr,
+    get_days_since_last_release,
     get_inactive_repos,
     get_int_env_var,
     is_repo_exempt,
@@ -47,17 +49,6 @@ class AuthToGithubTestCase(unittest.TestCase):
     enterprise URL and token, authentication with only a token, missing environment variables,
     and authentication failures.
 
-    Test methods:
-        - test_auth_to_github_app_with_github_app_installation_env_vars: Tests authencation
-          to GitHub application with app ID, app private key, and app installation ID.
-        - test_auth_to_github_with_enterprise_url_and_token: Tests authentication with both
-          enterprise URL and token.
-        - test_auth_to_github_with_token: Tests authentication with only a token.
-        - test_auth_to_github_without_environment_variables: Tests authentication with
-          missing environment variables.
-        - test_auth_to_github_without_enterprise_url: Tests authentication without an
-          enterprise URL.
-        - test_auth_to_github_authentication_failure: Tests authentication failure.
 
     """
 
@@ -323,12 +314,14 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            (
-                "https://github.com/example/repo2",
-                40,
-                forty_days_ago.date().isoformat(),
-                "private",
-            ),
+            {
+                "url": "https://github.com/example/repo2",
+                "days_inactive": 40,
+                "last_push_date": "2024-04-29",
+                "visibility": "private",
+                "days_since_last_release": None,
+                "days_since_last_pr": None,
+            }
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -472,12 +465,14 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            (
-                "https://github.com/example/repo2",
-                40,
-                forty_days_ago.date().isoformat(),
-                "private",
-            ),
+            {
+                "url": "https://github.com/example/repo2",
+                "days_inactive": 40,
+                "last_push_date": "2024-04-29",
+                "visibility": "private",
+                "days_since_last_release": None,
+                "days_since_last_pr": None,
+            }
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -546,12 +541,14 @@ class GetInactiveReposTestCase(unittest.TestCase):
 
         # Check that the function returns the expected list of inactive repos
         expected_inactive_repos = [
-            (
-                "https://github.com/example/repo2",
-                40,
-                forty_days_ago.date().isoformat(),
-                "private",
-            ),
+            {
+                "url": "https://github.com/example/repo2",
+                "days_inactive": 40,
+                "last_push_date": "2024-04-29",
+                "visibility": "private",
+                "days_since_last_release": None,
+                "days_since_last_pr": None,
+            }
         ]
         assert inactive_repos == expected_inactive_repos
 
@@ -572,20 +569,20 @@ class WriteToMarkdownTestCase(unittest.TestCase):
         """
         forty_days_ago = datetime.now(timezone.utc) - timedelta(days=40)
         thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
-        # Create a list of inactive repos
+        # Create an unsorted list of inactive repos
         inactive_repos = [
-            (
-                "https://github.com/example/repo2",
-                40,
-                forty_days_ago.date().isoformat(),
-                "public",
-            ),
-            (
-                "https://github.com/example/repo1",
-                30,
-                thirty_days_ago.date().isoformat(),
-                "private",
-            ),
+            {
+                "url": "https://github.com/example/repo1",
+                "days_inactive": 30,
+                "last_push_date": thirty_days_ago.date().isoformat(),
+                "visibility": "private",
+            },
+            {
+                "url": "https://github.com/example/repo2",
+                "days_inactive": 40,
+                "last_push_date": forty_days_ago.date().isoformat(),
+                "visibility": "public",
+            },
         ]
 
         inactive_days_threshold = 365
@@ -603,19 +600,20 @@ class WriteToMarkdownTestCase(unittest.TestCase):
                 "The following repos have not had a push event for more than 365 days:\n\n"
             ),
             call.write(
-                "| Repository URL | Days Inactive | Last Push Date | Visibility |\n"
+                "| Repository URL | Days Inactive | Last Push Date | Visibility |"
             ),
-            call.write("| --- | --- | --- | ---: |\n"),
+            call.write("\n| --- | --- | --- | ---: |"),
+            call.write("\n"),
             call.write(
-                f"| https://github.com/example/repo2 | 40 | "
-                f"{forty_days_ago.date().isoformat()} | "
-                f"public |\n"
+                f"| https://github.com/example/repo2 | 40 |\
+ {forty_days_ago.date().isoformat()} | public |"
             ),
+            call.write("\n"),
             call.write(
-                f"| https://github.com/example/repo1 | 30 | "
-                f"{thirty_days_ago.date().isoformat()} | "
-                f"private |\n"
+                f"| https://github.com/example/repo1 | 30 |\
+ {thirty_days_ago.date().isoformat()} | private |"
             ),
+            call.write("\n"),
         ]
         mock_file.__enter__.return_value.assert_has_calls(expected_calls)
 
@@ -661,24 +659,30 @@ class OutputToJson(unittest.TestCase):
         twenty_nine_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         # Create a list of inactive repos
         inactive_repos = [
-            (
-                "https://github.com/example/repo1",
-                31,
-                thirty_one_days_ago.date().isoformat(),
-                "private",
-            ),
-            (
-                "https://github.com/example/repo2",
-                30,
-                thirty_days_ago.date().isoformat(),
-                "private",
-            ),
-            (
-                "https://github.com/example/repo3",
-                29,
-                twenty_nine_days_ago.date().isoformat(),
-                "public",
-            ),
+            {
+                "url": "https://github.com/example/repo1",
+                "days_inactive": 31,
+                "last_push_date": thirty_one_days_ago.date().isoformat(),
+                "visibility": "private",
+                "days_since_last_release": 3,
+                "days_since_last_pr": 2,
+            },
+            {
+                "url": "https://github.com/example/repo2",
+                "days_inactive": 30,
+                "last_push_date": thirty_days_ago.date().isoformat(),
+                "visibility": "private",
+                "days_since_last_release": 1,
+                "days_since_last_pr": None,
+            },
+            {
+                "url": "https://github.com/example/repo3",
+                "days_inactive": 29,
+                "last_push_date": twenty_nine_days_ago.date().isoformat(),
+                "visibility": "public",
+                "days_since_last_release": None,
+                "days_since_last_pr": 5,
+            },
         ]
 
         # Call the output_to_json function with the list of inactive repos
@@ -718,24 +722,24 @@ class OutputToJson(unittest.TestCase):
         twenty_nine_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
         # Create a list of inactive repos
         inactive_repos = [
-            (
-                "https://github.com/example/repo1",
-                31,
-                thirty_one_days_ago.date().isoformat(),
-                "private",
-            ),
-            (
-                "https://github.com/example/repo2",
-                30,
-                thirty_days_ago.date().isoformat(),
-                "private",
-            ),
-            (
-                "https://github.com/example/repo3",
-                29,
-                twenty_nine_days_ago.date().isoformat(),
-                "public",
-            ),
+            {
+                "url": "https://github.com/example/repo1",
+                "days_inactive": 31,
+                "last_push_date": thirty_one_days_ago.date().isoformat(),
+                "visibility": "private",
+            },
+            {
+                "url": "https://github.com/example/repo2",
+                "days_inactive": 30,
+                "last_push_date": thirty_days_ago.date().isoformat(),
+                "visibility": "private",
+            },
+            {
+                "url": "https://github.com/example/repo3",
+                "days_inactive": 29,
+                "last_push_date": twenty_nine_days_ago.date().isoformat(),
+                "visibility": "public",
+            },
         ]
 
         # Call the output_to_json function with the list of inactive repos
@@ -850,5 +854,113 @@ class TestIsRepoExempt(unittest.TestCase):
         self.assertFalse(result)
 
 
-if __name__ == "__main__":
-    unittest.main()
+class TestAdditionalMetrics(unittest.TestCase):
+    """
+    Test suite for verifying the correct calculation and inclusion of days since last release
+    and last PR made in the report.
+    """
+
+    def test_days_since_last_release(self):
+        """
+        Test that the days since the last release
+        is correctly calculated and included in the report.
+        """
+        # Mock repository with a release date 10 days ago
+        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
+        mock_repo = MagicMock()
+        mock_repo.releases.return_value.__next__.return_value.created_at = (
+            thirty_days_ago
+        )
+
+        # Calculate days since last release
+        days_since_last_release = get_days_since_last_release(mock_repo)
+
+        self.assertEqual(days_since_last_release, 30)
+
+    def test_days_since_last_pr(self):
+        """
+        Test that the days since the last PR made
+        is correctly calculated and included in the report.
+        """
+        # Mock repository with a PR date 20 days ago
+        twenty_days_ago = datetime.now(timezone.utc) - timedelta(days=20)
+        mock_repo = MagicMock()
+        mock_repo.pull_requests.return_value.__next__.return_value.created_at = (
+            twenty_days_ago
+        )
+
+        # Calculate days since last PR
+        days_since_last_pr = get_days_since_last_pr(mock_repo)
+
+        self.assertEqual(days_since_last_pr, 20)
+
+    def test_report_inclusion_with_additional_metrics_configured(self):
+        """
+        Test that the report includes additional metrics when they are configured.
+        """
+        # Mock repository with a release date 10 days ago and a PR date 5 days ago
+        ten_days_ago = datetime.now(timezone.utc) - timedelta(days=10)
+        five_days_ago = datetime.now(timezone.utc) - timedelta(days=5)
+        forty_days_ago = datetime.now(timezone.utc) - timedelta(days=40)
+        mock_repo = MagicMock(
+            html_url="https://github.com/example/repo",
+            pushed_at=forty_days_ago.isoformat(),
+            archived=False,
+        )
+        mock_repo.releases.return_value.__next__.return_value.created_at = ten_days_ago
+        mock_repo.pull_requests.return_value.__next__.return_value.created_at = (
+            five_days_ago
+        )
+
+        # Mock GitHub connection
+        mock_github = MagicMock()
+        mock_github.organization.return_value.repositories.return_value = [mock_repo]
+
+        # Generate report with additional metrics configured
+        inactive_repos = get_inactive_repos(
+            mock_github, 30, "example", ["release", "pr"]
+        )
+
+        # Check that the report includes the additional metrics
+        expected_inactive_repos = [
+            {
+                "url": "https://github.com/example/repo",
+                "days_inactive": 40,
+                "last_push_date": forty_days_ago.date().isoformat(),
+                "visibility": "private",
+                "days_since_last_release": 10,
+                "days_since_last_pr": 5,
+            },
+        ]
+        self.assertEqual(inactive_repos, expected_inactive_repos)
+
+    def test_report_exclusion_with_additional_metrics_not_configured(self):
+        """
+        Test that the report excludes additional metrics when they are not configured.
+        """
+        forty_days_ago = datetime.now(timezone.utc) - timedelta(days=40)
+        mock_repo = MagicMock(
+            html_url="https://github.com/example/repo",
+            pushed_at=forty_days_ago.isoformat(),
+            archived=False,
+        )
+
+        # Mock GitHub connection
+        mock_github = MagicMock()
+        mock_github.organization.return_value.repositories.return_value = [mock_repo]
+
+        # Generate report without additional metrics configured
+        inactive_repos = get_inactive_repos(mock_github, 30, "example", [])
+
+        # Check that the report excludes the additional metrics
+        expected_inactive_repos = [
+            {
+                "url": "https://github.com/example/repo",
+                "days_inactive": 40,
+                "last_push_date": forty_days_ago.date().isoformat(),
+                "visibility": "private",
+                "days_since_last_release": None,
+                "days_since_last_pr": None,
+            },
+        ]
+        self.assertEqual(inactive_repos, expected_inactive_repos)
