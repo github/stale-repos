@@ -317,7 +317,7 @@ class GetInactiveReposTestCase(unittest.TestCase):
             {
                 "url": "https://github.com/example/repo2",
                 "days_inactive": 40,
-                "last_push_date": "2024-04-29",
+                "last_push_date": forty_days_ago.date().isoformat(),
                 "visibility": "private",
                 "days_since_last_release": None,
                 "days_since_last_pr": None,
@@ -468,7 +468,7 @@ class GetInactiveReposTestCase(unittest.TestCase):
             {
                 "url": "https://github.com/example/repo2",
                 "days_inactive": 40,
-                "last_push_date": "2024-04-29",
+                "last_push_date": forty_days_ago.date().isoformat(),
                 "visibility": "private",
                 "days_since_last_release": None,
                 "days_since_last_pr": None,
@@ -544,7 +544,7 @@ class GetInactiveReposTestCase(unittest.TestCase):
             {
                 "url": "https://github.com/example/repo2",
                 "days_inactive": 40,
-                "last_push_date": "2024-04-29",
+                "last_push_date": forty_days_ago.date().isoformat(),
                 "visibility": "private",
                 "days_since_last_release": None,
                 "days_since_last_pr": None,
