@@ -576,12 +576,16 @@ class WriteToMarkdownTestCase(unittest.TestCase):
                 "days_inactive": 30,
                 "last_push_date": thirty_days_ago.date().isoformat(),
                 "visibility": "private",
+                "days_since_last_release": None,
+                "days_since_last_pr": None,
             },
             {
                 "url": "https://github.com/example/repo2",
                 "days_inactive": 40,
                 "last_push_date": forty_days_ago.date().isoformat(),
                 "visibility": "public",
+                "days_since_last_release": None,
+                "days_since_last_pr": None,
             },
         ]
 
@@ -591,7 +595,12 @@ class WriteToMarkdownTestCase(unittest.TestCase):
         mock_file = MagicMock()
 
         # Call the write_to_markdown function with the mock file object
-        write_to_markdown(inactive_repos, inactive_days_threshold, file=mock_file)
+        write_to_markdown(
+            inactive_repos,
+            inactive_days_threshold,
+            additional_metrics=["release", "pr"],
+            file=mock_file,
+        )
 
         # Check that the mock file object was called with the expected data
         expected_calls = [
@@ -602,17 +611,25 @@ class WriteToMarkdownTestCase(unittest.TestCase):
             call.write(
                 "| Repository URL | Days Inactive | Last Push Date | Visibility |"
             ),
-            call.write("\n| --- | --- | --- | ---: |"),
+            call.write(" Days Since Last Release |"),
+            call.write(" Days Since Last PR |"),
+            call.write("\n| --- | --- | --- | --- |"),
+            call.write(" --- |"),
+            call.write(" --- |"),
             call.write("\n"),
             call.write(
                 f"| https://github.com/example/repo2 | 40 |\
  {forty_days_ago.date().isoformat()} | public |"
             ),
+            call.write(" None |"),
+            call.write(" None |"),
             call.write("\n"),
             call.write(
                 f"| https://github.com/example/repo1 | 30 |\
  {thirty_days_ago.date().isoformat()} | private |"
             ),
+            call.write(" None |"),
+            call.write(" None |"),
             call.write("\n"),
         ]
         mock_file.__enter__.return_value.assert_has_calls(expected_calls)

@@ -250,11 +250,12 @@ def write_to_markdown(
                 markdown_file.write(" Days Since Last Release |")
             if "pr" in additional_metrics:
                 markdown_file.write(" Days Since Last PR |")
-        markdown_file.write("\n| --- | --- | --- | ---: |")
-        if additional_metrics and (
-            "release" in additional_metrics or "pr" in additional_metrics
-        ):
-            markdown_file.write(" ---: |")
+        markdown_file.write("\n| --- | --- | --- | --- |")
+        if additional_metrics:
+            if "release" in additional_metrics:
+                markdown_file.write(" --- |")
+            if "pr" in additional_metrics:
+                markdown_file.write(" --- |")
         markdown_file.write("\n")
         for repo_data in inactive_repos:
             markdown_file.write(
