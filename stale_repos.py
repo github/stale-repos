@@ -213,7 +213,10 @@ def get_active_date(repo):
                 """
             )
     except github3.exceptions.GitHubException:
-        print(f"{repo.html_url} had an exception trying to get the activity date.")
+        print(
+            f"{repo.html_url} had an exception trying to get the activity date.\
+ Potentially caused by ghost user."
+        )
         return None
     return active_date
 
@@ -397,9 +400,21 @@ def set_repo_data(
     repo_data["days_since_last_pr"] = None
     if additional_metrics:
         if "release" in additional_metrics:
-            repo_data["days_since_last_release"] = get_days_since_last_release(repo)
+            try:
+                repo_data["days_since_last_release"] = get_days_since_last_release(repo)
+            except github3.exceptions.GitHubException:
+                print(
+                    f"{repo.html_url} had an exception trying to get the last release.\
+ Potentially caused by ghost user."
+                )
         if "pr" in additional_metrics:
-            repo_data["days_since_last_pr"] = get_days_since_last_pr(repo)
+            try:
+                repo_data["days_since_last_pr"] = get_days_since_last_pr(repo)
+            except github3.exceptions.GitHubException:
+                print(
+                    f"{repo.html_url} had an exception trying to get the last PR.\
+ Potentially caused by ghost user."
+                )
 
     print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
     return repo_data
