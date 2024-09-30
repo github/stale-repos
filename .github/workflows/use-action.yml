@@ -19,7 +19,7 @@ jobs:
       packages: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+        uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938
       - name: Run stale_repos tool
         uses: docker://ghcr.io/github/stale_repos:v1
         env:
@@ -27,7 +27,7 @@ jobs:
           ORGANIZATION: github
           INACTIVE_DAYS: 1
       - name: Create issue
-        uses: peter-evans/create-issue-from-file@24452a72d85239eacf1468b0f1982a9f3fec4c94
+        uses: peter-evans/create-issue-from-file@e8ef132d6df98ed982188e460ebb3b5d4ef3a9cd
         with:
           title: Stale repository report
           content-filepath: ./stale_repos.md
