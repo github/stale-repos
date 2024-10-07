@@ -1,6 +1,6 @@
 #checkov:skip=CKV_DOCKER_2
 #checkov:skip=CKV_DOCKER_3
-FROM python:3.12-slim@sha256:15bad989b293be1dd5eb26a87ecacadaee1559f98e29f02bf6d00c8d86129f39
+FROM python:3.12-slim@sha256:af4e85f1cac90dd3771e47292ea7c8a9830abfabbe4faa5c53f158854c2e819d
 LABEL com.github.actions.name="stale-repos" \
     com.github.actions.description="Find stale repositories in a GitHub organization." \
     com.github.actions.icon="check-square" \
