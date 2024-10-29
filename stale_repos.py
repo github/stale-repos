@@ -7,6 +7,7 @@ from datetime import datetime, timezone
 from os.path import dirname, join
 
 import github3
+from auth import auth_to_github
 from dateutil.parser import parse
 from dotenv import load_dotenv
 
@@ -32,8 +33,22 @@ def main():  # pragma: no cover
     dotenv_path = join(dirname(__file__), ".env")
     load_dotenv(dotenv_path)
 
-    # Auth to GitHub.com
-    github_connection = auth_to_github()
+    token = os.getenv("ORGANIZATION")
+    gh_app_id = os.getenv("GH_APP_ID")
+    gh_app_installation_id = os.getenv("GH_APP_INSTALLATION_ID")
+    gh_app_private_key = os.getenv("GH_APP_PRIVATE_KEY").encode("utf8")
+    ghe = os.getenv("GH_ENTERPRISE_URL")
+    gh_app_enterprise_only = os.getenv("GITHUB_APP_ENTERPRISE_ONLY")
+
+    # Auth to GitHub.com or GHE
+    github_connection = auth_to_github(
+        token,
+        gh_app_id,
+        gh_app_installation_id,
+        gh_app_private_key,
+        ghe,
+        gh_app_enterprise_only,
+    )
 
     # Set the threshold for inactive days
     inactive_days_threshold = os.getenv("INACTIVE_DAYS")
@@ -344,32 +359,6 @@ def get_int_env_var(env_var_name):
         return int(env_var)
     except ValueError:
         return None
-
-
-def auth_to_github():
-    """Connect to GitHub.com or GitHub Enterprise, depending on env variables."""
-    gh_app_id = get_int_env_var("GH_APP_ID")
-    gh_app_private_key_bytes = os.environ.get("GH_APP_PRIVATE_KEY", "").encode("utf8")
-    gh_app_installation_id = get_int_env_var("GH_APP_INSTALLATION_ID")
-    ghe = os.getenv("GH_ENTERPRISE_URL", default="").strip()
-    token = os.getenv("GH_TOKEN")
-
-    if gh_app_id and gh_app_private_key_bytes and gh_app_installation_id:
-        gh = github3.github.GitHub()
-        gh.login_as_app_installation(
-            gh_app_private_key_bytes, gh_app_id, gh_app_installation_id
-        )
-        github_connection = gh
-    elif ghe and token:
-        github_connection = github3.github.GitHubEnterprise(ghe, token=token)
-    elif token:
-        github_connection = github3.login(token=os.getenv("GH_TOKEN"))
-    else:
-        raise ValueError("GH_TOKEN environment variable not set")
-
-    if not github_connection:
-        raise ValueError("Unable to authenticate to GitHub")
-    return github_connection  # type: ignore
 
 
 def set_repo_data(
