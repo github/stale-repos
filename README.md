@@ -31,7 +31,7 @@ All feedback regarding our GitHub Actions, as a whole, should be communicated th
 ## Use as a GitHub Action
 
 1. Create a repository to host this GitHub Action or select an existing repository.
-1. Create the env values from the sample workflow below (GH_TOKEN, ORGANIZATION, EXEMPT_TOPICS) with your information as plain text or repository secrets. More info on creating secrets can be found [here](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
+1. Create the env values from the sample workflow below (`GH_TOKEN`, `ORGANIZATION`, `EXEMPT_TOPICS`) with your information as plain text or repository secrets. More info on creating secrets can be found [here](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
    Note: Your GitHub token will need to have read access to all the repositories in the organization that you want evaluated
 1. Copy the below example workflow to your repository and put it in the `.github/workflows/` directory with the file extension `.yml` (ie. `.github/workflows/stale_repos.yml`)
 
@@ -45,11 +45,12 @@ This action can be configured to authenticate with GitHub App Installation or Pe
 
 ##### GitHub App Installation
 
-| field                    | required | default | description                                                                                                                                                                                             |
-| ------------------------ | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GH_APP_ID`              | True     | `""`    | GitHub Application ID. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details.              |
-| `GH_APP_INSTALLATION_ID` | True     | `""`    | GitHub Application Installation ID. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details. |
-| `GH_APP_PRIVATE_KEY`     | True     | `""`    | GitHub Application Private Key. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details.     |
+| field                        | required | default | description                                                                                                                                                                                             |
+| ---------------------------- | -------- | ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GH_APP_ID`                  | True     | `""`    | GitHub Application ID. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details.              |
+| `GH_APP_INSTALLATION_ID`     | True     | `""`    | GitHub Application Installation ID. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details. |
+| `GH_APP_PRIVATE_KEY`         | True     | `""`    | GitHub Application Private Key. See [documentation](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/about-authentication-with-a-github-app) for more details.     |
+| `GITHUB_APP_ENTERPRISE_ONLY` | False    | `false` | Set this input to `true` if your app is created in GHE and communicates with GHE.                                                                                                                       |
 
 ##### Personal Access Token (PAT)
 
@@ -243,6 +244,7 @@ jobs:
           GH_APP_ID: ${{ secrets.GH_APP_ID }}
           GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
           GH_APP_PRIVATE_KEY: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          #GITHUB_APP_ENTERPRISE_ONLY: true --> Set this if the gh app was created in GHE and the endpoint is also a GHE instance
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
           EXEMPT_TOPICS: "keep,template"
           INACTIVE_DAYS: 365
