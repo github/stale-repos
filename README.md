@@ -252,7 +252,7 @@ jobs:
 
 ## Local usage without Docker
 
-1. Have Python v3.9 or greater installed
+1. Have Python v3.11 or greater installed
 1. Copy `.env-example` to `.env`
 1. Fill out the `.env` file with a _token_ from a user that has access to the organization to scan (listed below). Tokens should have admin:org or read:org access.
 1. Fill out the `.env` file with the desired _inactive_days_ value. This should be a whole positive number representing the amount of inactivity that you want for flagging stale repos.
@@ -264,7 +264,7 @@ jobs:
 
 ## Local testing without Docker
 
-1. Have Python v3.9 or greater installed
+1. Have Python v3.11 or greater installed
 1. `pip install -r requirements.txt -r requirements-test.txt`
 1. `make lint`
 1. `make test`
