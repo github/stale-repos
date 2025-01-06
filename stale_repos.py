@@ -8,9 +8,10 @@ from datetime import datetime, timezone
 from os.path import dirname, join
 
 import github3
-from auth import auth_to_github
 from dateutil.parser import parse
 from dotenv import load_dotenv
+
+import auth
 
 
 def main():  # pragma: no cover
@@ -42,7 +43,7 @@ def main():  # pragma: no cover
     gh_app_enterprise_only = os.getenv("GITHUB_APP_ENTERPRISE_ONLY")
 
     # Auth to GitHub.com or GHE
-    github_connection = auth_to_github(
+    github_connection = auth.auth_to_github(
         token,
         gh_app_id,
         gh_app_installation_id,
