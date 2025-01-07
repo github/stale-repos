@@ -35,7 +35,7 @@ def main():  # pragma: no cover
     dotenv_path = join(dirname(__file__), ".env")
     load_dotenv(dotenv_path)
 
-    token = os.getenv("ORGANIZATION")
+    token = os.getenv("GH_TOKEN")
     gh_app_id = os.getenv("GH_APP_ID")
     gh_app_installation_id = os.getenv("GH_APP_INSTALLATION_ID")
     gh_app_private_key = os.getenv("GH_APP_PRIVATE_KEY").encode("utf8")
