@@ -217,6 +217,8 @@ def get_active_date(repo):
         if activity_method == "default_branch_updated":
             commit = repo.branch(repo.default_branch).commit
             active_date = parse(commit.commit.as_dict()["committer"]["date"])
+            committer_name = parse(commit.commit.as_dict()["committer"]["name"])
+            committer_email = parse(commit.commit.as_dict()["committer"]["email"])
         elif activity_method == "pushed":
             last_push_str = repo.pushed_at  # type: ignored
             if last_push_str is None:
