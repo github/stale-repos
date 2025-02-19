@@ -217,8 +217,6 @@ def get_active_date(repo):
         if activity_method == "default_branch_updated":
             commit = repo.branch(repo.default_branch).commit
             active_date = parse(commit.commit.as_dict()["committer"]["date"])
-            committer_name = parse(commit.commit.as_dict()["committer"]["name"])
-            committer_email = parse(commit.commit.as_dict()["committer"]["email"])
         elif activity_method == "pushed":
             last_push_str = repo.pushed_at  # type: ignored
             if last_push_str is None:
@@ -318,6 +316,9 @@ def output_to_json(inactive_repos, file=None):
     #     "daysSinceLastPR": "10"
     #   }
     # ]
+    # Instead of looping through an array and then using json dump
+    # why not just   inactive_repos_json = json.dumps(inactive_repos)
+    # and then remove line 323-335 NOTE: FOR ADAM AND BORIS
     inactive_repos_json = []
     for repo_data in inactive_repos:
         repo_json = {
@@ -391,6 +392,8 @@ def set_repo_data(
     # Fetch and include additional metrics if configured
     repo_data["days_since_last_release"] = None
     repo_data["days_since_last_pr"] = None
+    repo_data["committer"] = get_committer(repo)
+    repo_data["owner"] = get_owner(repo)
     if additional_metrics:
         if "release" in additional_metrics:
             try:
@@ -408,9 +411,43 @@ def set_repo_data(
                     f"{repo.html_url} had an exception trying to get the last PR.\
  Potentially caused by ghost user."
                 )
-
     print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
     return repo_data
+
+
+def get_committer(repo):
+    """Get the committer of the last commit on the default branch.
+
+    Args:
+        repo: A Github repository object.
+
+    Returns:
+        A dictionary with the committer's name and email.
+    """
+    try:
+        commit = repo.branch(repo.default_branch).commit
+        committer = commit.committer
+        return {"name": committer.name, "email": committer.email}
+    except github3.exceptions.GitHubException:
+        print(f"{repo.html_url} had an exception trying to get the committer.")
+        return None
+
+
+def get_owner(repo):
+    """Get the owner of the repository.
+
+    Args:
+        repo: A Github repository object.
+
+    Returns:
+        A dictionary with the owner's name and email.
+    """
+    try:
+        owner = repo.owner
+        return {"name": owner.name, "email": owner.email}
+    except github3.exceptions.GitHubException:
+        print(f"{repo.html_url} had an exception trying to get the owner.")
+        return None
 
 
 if __name__ == "__main__":
