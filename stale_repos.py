@@ -426,8 +426,7 @@ def get_committer(repo):
     """
     try:
         commit = repo.branch(repo.default_branch).commit
-        committer = commit.committer
-        return {"name": committer.name, "email": committer.email}
+        return {"login": commit.author.login}
     except github3.exceptions.GitHubException:
         print(f"{repo.html_url} had an exception trying to get the committer.")
         return None
