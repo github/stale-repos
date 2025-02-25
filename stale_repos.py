@@ -80,7 +80,7 @@ def main():  # pragma: no cover
         print("No stale repos found")
 
     if exception_repos:
-        output_to_json(exception_repos)
+        output_to_json_exception_repos(exception_repos)
 
 
 
@@ -176,10 +176,10 @@ def get_inactive_repos(
             inactive_repos.append(repo_data)
     if organization:
         print(f"Found {len(inactive_repos)} stale repos in {organization}")
-        print(f"Found {len(exception_repos)} repos unable to get last activity date in {organization}")
+        print(f"Found {len(exception_repos)} repos where was unable to get last activity date in {organization}")
     else:
         print(f"Found {len(inactive_repos)} stale repos")
-        print(f"Found {len(exception_repos)} repos unable to get last activity date")
+        print(f"Found {len(exception_repos)} repos where was unable to get last activity date")
     return inactive_repos,exception_repos
 
 
@@ -362,7 +362,7 @@ def output_to_json(inactive_repos, file=None):
     return inactive_repos_json
 
 
-def output_to_json_expection_repos(exception_repos, file=None):
+def output_to_json_exception_repos(exception_repos, file=None):
     """Convert the list of exception repos to a json string.
 
     Args:
