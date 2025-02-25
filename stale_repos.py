@@ -69,7 +69,7 @@ def main():  # pragma: no cover
 
     # Iterate over repos in the org, acquire inactive days,
     # and print out the repo url and days inactive if it's over the threshold (inactive_days)
-    inactive_repos = get_inactive_repos(
+    inactive_repos, exception_repos = get_inactive_repos(
         github_connection, inactive_days_threshold, organization, additional_metrics
     )
 
@@ -78,6 +78,10 @@ def main():  # pragma: no cover
         write_to_markdown(inactive_repos, inactive_days_threshold, additional_metrics)
     else:
         print("No stale repos found")
+
+    if exception_repos:
+        output_to_json(exception_repos)
+
 
 
 def is_repo_exempt(repo, exempt_repos, exempt_topics):
@@ -129,6 +133,8 @@ def get_inactive_repos(
 
     """
     inactive_repos = []
+    exception_repos = []
+
     if organization:
         repos = github_connection.organization(organization).repositories()
     else:
@@ -153,12 +159,16 @@ def get_inactive_repos(
 
         # Get last active date
         active_date = get_active_date(repo)
+        visibility = "private" if repo.private else "public"
+
         if active_date is None:
+            exception_repos.append(set_repo_data(
+                repo, None, None, visibility, None
+            ))
             continue
 
         active_date_disp = active_date.date().isoformat()
         days_inactive = (datetime.now(timezone.utc) - active_date).days
-        visibility = "private" if repo.private else "public"
         if days_inactive > int(inactive_days_threshold):
             repo_data = set_repo_data(
                 repo, days_inactive, active_date_disp, visibility, additional_metrics
@@ -166,9 +176,11 @@ def get_inactive_repos(
             inactive_repos.append(repo_data)
     if organization:
         print(f"Found {len(inactive_repos)} stale repos in {organization}")
+        print(f"Found {len(exception_repos)} repos unable to get last activity date in {organization}")
     else:
         print(f"Found {len(inactive_repos)} stale repos")
-    return inactive_repos
+        print(f"Found {len(exception_repos)} repos unable to get last activity date")
+    return inactive_repos,exception_repos
 
 
 def get_days_since_last_release(repo):
@@ -327,7 +339,7 @@ def output_to_json(inactive_repos, file=None):
             "daysInactive": repo_data["days_inactive"],
             "lastPushDate": repo_data["last_push_date"],
             "visibility": repo_data["visibility"],
-            "last_Committer":repo_data["last_committer"],
+            "last_committer":repo_data["last_committer"],
         }
         if "release" in repo_data:
             repo_json["daysSinceLastRelease"] = repo_data["days_since_last_release"]
@@ -348,6 +360,42 @@ def output_to_json(inactive_repos, file=None):
     print("Wrote stale repos to stale_repos.json")
 
     return inactive_repos_json
+
+
+def output_to_json_expection_repos(exception_repos, file=None):
+    """Convert the list of exception repos to a json string.
+
+    Args:
+        exception_repos: A list of dictionaries containing the repo,
+            visiblity of the repository (public/private), last_committer.
+
+    Returns:
+        JSON formatted string of the list of exception repos.
+
+    """
+ 
+    exception_repos_json = []
+    for repo_data in exception_repos:
+        repo_json = {
+            "url": repo_data["url"],
+            "visibility": repo_data["visibility"],
+            "last_committer":repo_data["last_committer"],
+        }
+        exception_repos_json.append(repo_json)
+    exception_repos_json = json.dumps(exception_repos_json)
+
+    # add output to github action output
+    # pylint: disable=unspecified-encoding
+    if os.environ.get("GITHUB_OUTPUT"):
+        with open(os.environ["GITHUB_OUTPUT"], "a") as file_handle:
+            print(f"exceptionRepos={exception_repos_json}", file=file_handle)
+
+    with file or open("exception_repos.json", "w", encoding="utf-8") as json_file:
+        json_file.write(exception_repos_json)
+
+    print("Wrote exception repos to exception_repos.json")
+
+    return exception_repos_json
 
 
 def get_int_env_var(env_var_name):
