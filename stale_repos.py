@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-""" Find stale repositories in a GitHub organization. """
+"""Find stale repositories in a GitHub organization."""
 
 import fnmatch
 import json
