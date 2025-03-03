@@ -69,7 +69,7 @@ def main():  # pragma: no cover
 
     # Iterate over repos in the org, acquire inactive days,
     # and print out the repo url and days inactive if it's over the threshold (inactive_days)
-    inactive_repos = get_inactive_repos(
+    inactive_repos, exception_repos = get_inactive_repos(
         github_connection, inactive_days_threshold, organization, additional_metrics
     )
 
@@ -78,6 +78,10 @@ def main():  # pragma: no cover
         write_to_markdown(inactive_repos, inactive_days_threshold, additional_metrics)
     else:
         print("No stale repos found")
+
+    if exception_repos:
+        output_to_json_exception_repos(exception_repos)
+
 
 
 def is_repo_exempt(repo, exempt_repos, exempt_topics):
@@ -129,6 +133,8 @@ def get_inactive_repos(
 
     """
     inactive_repos = []
+    exception_repos = []
+
     if organization:
         repos = github_connection.organization(organization).repositories()
     else:
@@ -153,12 +159,16 @@ def get_inactive_repos(
 
         # Get last active date
         active_date = get_active_date(repo)
+        visibility = "private" if repo.private else "public"
+
         if active_date is None:
+            exception_repos.append(set_repo_data(
+                repo, None, None, visibility, None
+            ))
             continue
 
         active_date_disp = active_date.date().isoformat()
         days_inactive = (datetime.now(timezone.utc) - active_date).days
-        visibility = "private" if repo.private else "public"
         if days_inactive > int(inactive_days_threshold):
             repo_data = set_repo_data(
                 repo, days_inactive, active_date_disp, visibility, additional_metrics
@@ -166,9 +176,11 @@ def get_inactive_repos(
             inactive_repos.append(repo_data)
     if organization:
         print(f"Found {len(inactive_repos)} stale repos in {organization}")
+        print(f"Found {len(exception_repos)} repos where was unable to get last activity date in {organization}")
     else:
         print(f"Found {len(inactive_repos)} stale repos")
-    return inactive_repos
+        print(f"Found {len(exception_repos)} repos where was unable to get last activity date")
+    return inactive_repos,exception_repos
 
 
 def get_days_since_last_release(repo):
@@ -262,7 +274,7 @@ def write_to_markdown(
             f"{inactive_days_threshold} days:\n\n"
         )
         markdown_file.write(
-            "| Repository URL | Days Inactive | Last Push Date | Visibility |"
+            "| Repository URL | Days Inactive | Last Push Date | Visibility | Last Committer"
         )
         # Include additional metrics columns if configured
         if additional_metrics:
@@ -270,7 +282,7 @@ def write_to_markdown(
                 markdown_file.write(" Days Since Last Release |")
             if "pr" in additional_metrics:
                 markdown_file.write(" Days Since Last PR |")
-        markdown_file.write("\n| --- | --- | --- | --- |")
+        markdown_file.write("\n| --- | --- | --- | --- | --- |")
         if additional_metrics:
             if "release" in additional_metrics:
                 markdown_file.write(" --- |")
@@ -282,7 +294,8 @@ def write_to_markdown(
                 f"| {repo_data['url']} \
 | {repo_data['days_inactive']} \
 | {repo_data['last_push_date']} \
-| {repo_data['visibility']} |"
+| {repo_data['visibility']} \
+| {repo_data['last_committer']} |"
             )
             if additional_metrics:
                 if "release" in additional_metrics:
@@ -316,6 +329,9 @@ def output_to_json(inactive_repos, file=None):
     #     "daysSinceLastPR": "10"
     #   }
     # ]
+    # Instead of looping through an array and then using json dump
+    # why not just   inactive_repos_json = json.dumps(inactive_repos)
+    # and then remove line 323-335 NOTE: FOR ADAM AND BORIS
     inactive_repos_json = []
     for repo_data in inactive_repos:
         repo_json = {
@@ -323,6 +339,7 @@ def output_to_json(inactive_repos, file=None):
             "daysInactive": repo_data["days_inactive"],
             "lastPushDate": repo_data["last_push_date"],
             "visibility": repo_data["visibility"],
+            "last_committer":repo_data["last_committer"],
         }
         if "release" in repo_data:
             repo_json["daysSinceLastRelease"] = repo_data["days_since_last_release"]
@@ -343,6 +360,42 @@ def output_to_json(inactive_repos, file=None):
     print("Wrote stale repos to stale_repos.json")
 
     return inactive_repos_json
+
+
+def output_to_json_exception_repos(exception_repos, file=None):
+    """Convert the list of exception repos to a json string.
+
+    Args:
+        exception_repos: A list of dictionaries containing the repo,
+            visiblity of the repository (public/private), last_committer.
+
+    Returns:
+        JSON formatted string of the list of exception repos.
+
+    """
+ 
+    exception_repos_json = []
+    for repo_data in exception_repos:
+        repo_json = {
+            "url": repo_data["url"],
+            "visibility": repo_data["visibility"],
+            "last_committer":repo_data["last_committer"],
+        }
+        exception_repos_json.append(repo_json)
+    exception_repos_json = json.dumps(exception_repos_json)
+
+    # add output to github action output
+    # pylint: disable=unspecified-encoding
+    if os.environ.get("GITHUB_OUTPUT"):
+        with open(os.environ["GITHUB_OUTPUT"], "a") as file_handle:
+            print(f"exceptionRepos={exception_repos_json}", file=file_handle)
+
+    with file or open("exception_repos.json", "w", encoding="utf-8") as json_file:
+        json_file.write(exception_repos_json)
+
+    print("Wrote exception repos to exception_repos.json")
+
+    return exception_repos_json
 
 
 def get_int_env_var(env_var_name):
@@ -389,6 +442,7 @@ def set_repo_data(
     # Fetch and include additional metrics if configured
     repo_data["days_since_last_release"] = None
     repo_data["days_since_last_pr"] = None
+    repo_data["last_committer"] = get_committer(repo)
     if additional_metrics:
         if "release" in additional_metrics:
             try:
@@ -406,10 +460,34 @@ def set_repo_data(
                     f"{repo.html_url} had an exception trying to get the last PR.\
  Potentially caused by ghost user."
                 )
-
     print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
     return repo_data
 
+
+def get_committer(repo):
+    """Get the committer of the last commit on the default branch.
+
+    Args:
+        repo: A Github repository object.
+
+    Returns:
+        A dictionary with the committer's name and email.
+    """
+    try:
+
+        commit = repo.branch(repo.default_branch).commit
+        
+        if hasattr(commit.commit, '_author_name'):
+            return commit.commit._author_name
+        elif "name" in commit.commit.author:
+            return commit.commit.author["name"]
+        elif hasattr(commit.commit, 'login'):
+            return commit.author.login
+        else:
+            return "None"
+        
+    except github3.exceptions.GitHubException:
+        return "None"
 
 if __name__ == "__main__":
     main()
