@@ -41,6 +41,9 @@ def main():  # pragma: no cover
     gh_app_private_key = os.getenv("GH_APP_PRIVATE_KEY").encode("utf8")
     ghe = os.getenv("GH_ENTERPRISE_URL")
     gh_app_enterprise_only = os.getenv("GITHUB_APP_ENTERPRISE_ONLY")
+    skip_empty_reports = (
+        False if os.getenv("SKIP_EMPTY_REPORTS").lower() == "false" else True
+    )
 
     # Auth to GitHub.com or GHE
     github_connection = auth.auth_to_github(
@@ -73,11 +76,11 @@ def main():  # pragma: no cover
         github_connection, inactive_days_threshold, organization, additional_metrics
     )
 
-    if inactive_repos:
+    if inactive_repos or not skip_empty_reports:
         output_to_json(inactive_repos)
         write_to_markdown(inactive_repos, inactive_days_threshold, additional_metrics)
     else:
-        print("No stale repos found")
+        print("Reporting skipped; no stale repos found.")
 
 
 def is_repo_exempt(repo, exempt_repos, exempt_topics):

@@ -69,6 +69,7 @@ This action can be configured to authenticate with GitHub App Installation or Pe
 | `EXEMPT_TOPICS`      | false    |            | Comma separated list of topics to exempt from being flagged as stale                                                                                                                                                                                                    |
 | `ORGANIZATION`       | false    |            | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner                                                                                                                 |
 | `ADDITIONAL_METRICS` | false    |            | Configure additional metrics like days since last release or days since last pull request. This allows for more detailed reporting on repository activity. To include both metrics, set `ADDITIONAL_METRICS: "release,pr"`                                              |
+| `SKIP_EMPTY_REPORTS` | false    | `true`     | Skips report creation when no stale repositories are identified. Setting this input to `false` means reports are always created, even when they contain no results.                                                                                                     |
 
 ### Example workflow
 
