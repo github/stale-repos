@@ -29,7 +29,7 @@ class TestEnvGetInt(unittest.TestCase):
         self.assertIsNone(result)
 
     def test_get_int_env_var_that_does_not_exist_and_default_value_returns_none(self):
-        """Test that gets a integer environment variable that does not exist
+        """Test that gets an integer environment variable that does not exist
         and default value returns: none
         """
         result = get_int_env_var("DOES_NOT_EXIST")
