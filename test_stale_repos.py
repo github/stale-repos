@@ -29,54 +29,10 @@ from stale_repos import (
     get_days_since_last_pr,
     get_days_since_last_release,
     get_inactive_repos,
-    get_int_env_var,
     is_repo_exempt,
     output_to_json,
     write_to_markdown,
 )
-
-
-class TestGetIntFromEnv(unittest.TestCase):
-    """
-    Test suite for the get_int_from_env function.
-
-    ...
-
-    Test methods:
-        - test_get_int_env_var: Test returns the expected integer value.
-        - test_get_int_env_var_with_empty_env_var: Test returns None when environment variable
-          is empty.
-        - test_get_int_env_var_with_non_integer: Test returns None when environment variable
-          is a non-integer.
-    """
-
-    @patch.dict(os.environ, {"INT_ENV_VAR": "12345"})
-    def test_get_int_env_var(self):
-        """
-        Test that get_int_env_var returns the expected integer value.
-        """
-        result = get_int_env_var("INT_ENV_VAR")
-        self.assertEqual(result, 12345)
-
-    @patch.dict(os.environ, {"INT_ENV_VAR": ""})
-    def test_get_int_env_var_with_empty_env_var(self):
-        """
-        This test verifies that the get_int_env_var function returns None
-        when the environment variable is empty.
-
-        """
-        result = get_int_env_var("INT_ENV_VAR")
-        self.assertIsNone(result)
-
-    @patch.dict(os.environ, {"INT_ENV_VAR": "not_an_int"})
-    def test_get_int_env_var_with_non_integer(self):
-        """
-        Test that get_int_env_var returns None when the environment variable is
-        a non-integer.
-
-        """
-        result = get_int_env_var("INT_ENV_VAR")
-        self.assertIsNone(result)
 
 
 class GetInactiveReposTestCase(unittest.TestCase):

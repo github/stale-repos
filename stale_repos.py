@@ -5,11 +5,10 @@ import fnmatch
 import json
 import os
 from datetime import datetime, timezone
-from os.path import dirname, join
 
 import github3
 from dateutil.parser import parse
-from dotenv import load_dotenv
+from env import get_env_vars
 
 import auth
 
@@ -31,26 +30,21 @@ def main():  # pragma: no cover
     """
     print("Starting stale repo search...")
 
-    # Load env variables from file
-    dotenv_path = join(dirname(__file__), ".env")
-    load_dotenv(dotenv_path)
-
-    token = os.getenv("GH_TOKEN")
-    gh_app_id = os.getenv("GH_APP_ID")
-    gh_app_installation_id = os.getenv("GH_APP_INSTALLATION_ID")
-    gh_app_private_key = os.getenv("GH_APP_PRIVATE_KEY").encode("utf8")
-    ghe = os.getenv("GH_ENTERPRISE_URL")
-    gh_app_enterprise_only = os.getenv("GITHUB_APP_ENTERPRISE_ONLY")
-    skip_empty_reports = (
-        False if os.getenv("SKIP_EMPTY_REPORTS").lower() == "false" else True
-    )
+    env_vars = get_env_vars()
+    token = env_vars.gh_token
+    gh_app_id = env_vars.gh_app_id
+    gh_app_installation_id = env_vars.gh_app_installation_id
+    gh_app_private_key_bytes = env_vars.gh_app_private_key_bytes
+    ghe = env_vars.ghe
+    gh_app_enterprise_only = env_vars.gh_app_enterprise_only
+    skip_empty_reports = env_vars.skip_empty_reports
 
     # Auth to GitHub.com or GHE
     github_connection = auth.auth_to_github(
         token,
         gh_app_id,
         gh_app_installation_id,
-        gh_app_private_key,
+        gh_app_private_key_bytes,
         ghe,
         gh_app_enterprise_only,
     )
@@ -221,7 +215,7 @@ def get_active_date(repo):
             commit = repo.branch(repo.default_branch).commit
             active_date = parse(commit.commit.as_dict()["committer"]["date"])
         elif activity_method == "pushed":
-            last_push_str = repo.pushed_at  # type: ignored
+            last_push_str = repo.pushed_at  # type: ignore
             if last_push_str is None:
                 return None
             active_date = parse(last_push_str)
@@ -346,24 +340,6 @@ def output_to_json(inactive_repos, file=None):
     print("Wrote stale repos to stale_repos.json")
 
     return inactive_repos_json
-
-
-def get_int_env_var(env_var_name):
-    """Get an integer environment variable.
-
-    Args:
-        env_var_name: The name of the environment variable to retrieve.
-
-    Returns:
-        The value of the environment variable as an integer or None.
-    """
-    env_var = os.environ.get(env_var_name)
-    if env_var is None or not env_var.strip():
-        return None
-    try:
-        return int(env_var)
-    except ValueError:
-        return None
 
 
 def set_repo_data(
