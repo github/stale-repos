@@ -13,14 +13,14 @@ permissions:
   contents: write
 jobs:
   update_tag:
-    name: Update the major tag to include the ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }} changes
+    name: Update the major tag to include the ${{ github.event.inputs.TAG_NAME || github.ref }} changes
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4.2.2
         with:
           fetch-tags: true
-          ref: ${ TAG_NAME }
+          ref: ${{ github.event.inputs.TAG_NAME || github.ref }}
       - name: version
         id: version
         run: |
