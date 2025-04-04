@@ -10,11 +10,9 @@ on:
 env:
   TAG_NAME: ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }}
 permissions:
-  contents: read
+  contents: write
 jobs:
   update_tag:
-    permissions:
-      contents: write
     name: Update the major tag to include the ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }} changes
     runs-on: ubuntu-latest
     steps:
