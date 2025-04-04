@@ -20,6 +20,7 @@ jobs:
         uses: actions/checkout@v4.2.2
         with:
           fetch-tags: true
+          ref: ${ TAG_NAME }
       - name: version
         id: version
         run: |
