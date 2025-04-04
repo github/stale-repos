@@ -18,6 +18,8 @@ jobs:
     steps:
       - name: Checkout Repo
         uses: actions/checkout@v4.2.2
+        with:
+          fetch-tags: true
       - name: version
         id: version
         run: |
@@ -27,5 +29,5 @@ jobs:
           { echo "tag=${tag}"; echo "version=${version}"; echo "major=${major}"; } >> "$GITHUB_OUTPUT"
       - name: force update major tag
         run: |
-          git tag v${{ steps.version.outputs.major }} ${TAG_NAME}
+          git tag v${{ steps.version.outputs.major }} ${{ steps.version.outputs.tag }}
           git push -f origin v${{ steps.version.outputs.major }}
