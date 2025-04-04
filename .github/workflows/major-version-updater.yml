@@ -22,3 +22,4 @@ jobs:
         uses: actions/publish-action@8a4b4f687b72f481b8a241ef71f38857239698fc
         with:
           source-tag: ${{ env.TAG_NAME }}
+          token: ${{ secrets.GITHUB_TOKEN }}
