@@ -27,5 +27,5 @@ jobs:
           { echo "tag=${tag}"; echo "version=${version}"; echo "major=${major}"; } >> "$GITHUB_OUTPUT"
       - name: force update major tag
         run: |
-          git tag v${{ steps.version.outputs.major }}
-          git push origin refs/tags/v${{ steps.version.outputs.major }} -f
+          git tag v${{ steps.version.outputs.major }} ${{ github.ref }}
+          git push -f origin v${{ steps.version.outputs.major }}
