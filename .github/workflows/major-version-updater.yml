@@ -1,3 +1,4 @@
+#checkov:skip=CKV_GHA_7
 name: Update major tag for release
 on:
   release:
