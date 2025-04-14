@@ -1,4 +1,4 @@
-FROM python:3.13-slim@sha256:8f3aba466a471c0ab903dbd7cb979abd4bda370b04789d25440cc90372b50e04
+FROM python:3.13-slim@sha256:21e39cf1815802d4c6f89a0d3a166cc67ce58f95b6d1639e68a394c99310d2e5
 LABEL com.github.actions.name="stale-repos" \
     com.github.actions.description="Find stale repositories in a GitHub organization." \
     com.github.actions.icon="check-square" \
