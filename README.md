@@ -118,7 +118,7 @@ jobs:
         uses: peter-evans/create-issue-from-file@v5
         with:
           issue-number: ${{ env.issue_number }}
-          title: Stale repository report
+          title: Stale-repository-report
           content-filepath: ./stale_repos.md
           assignees: <YOUR_GITHUB_HANDLE_HERE>
           token: ${{ secrets.GITHUB_TOKEN }}
