@@ -94,10 +94,10 @@ jobs:
       issues: write
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Run stale_repos tool
-        uses: github/stale-repos@v1
+        uses: github/stale-repos@v2
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -109,7 +109,7 @@ jobs:
       # This next step updates an existing issue. If you want a new issue every time, remove this step and remove the `issue-number: ${{ env.issue_number }}` line below.
       - name: Check for the stale report issue
         run: |
-          ISSUE_NUMBER=$(gh search issues "Stale repository report" --match title --json number --jq ".[0].number")
+          ISSUE_NUMBER=$(gh search issues "Stale-repository-report" --match title --json number --jq ".[0].number")
           echo "issue_number=$ISSUE_NUMBER" >> "$GITHUB_ENV"
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -118,7 +118,7 @@ jobs:
         uses: peter-evans/create-issue-from-file@v5
         with:
           issue-number: ${{ env.issue_number }}
-          title: Stale repository report
+          title: Stale-repository-report
           content-filepath: ./stale_repos.md
           assignees: <YOUR_GITHUB_HANDLE_HERE>
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -161,7 +161,7 @@ jobs:
     steps:
       - name: Run stale_repos tool
         id: stale-repos
-        uses: github/stale-repos@v1
+        uses: github/stale-repos@v2
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -210,7 +210,7 @@ jobs:
         org: [org1, org2]
     steps:
       - name: "run stale-repos"
-        uses: github/stale-repos@v1
+        uses: github/stale-repos@v2
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ matrix.org }}
@@ -237,10 +237,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Run stale_repos tool
-        uses: github/stale-repos@v1
+        uses: github/stale-repos@v2
         env:
           GH_APP_ID: ${{ secrets.GH_APP_ID }}
           GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
