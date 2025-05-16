@@ -209,7 +209,7 @@ class GetInactiveReposTestCase(unittest.TestCase):
         expected_output = (
             f"Exempt topics: ['topic1', 'topic2']\n"
             f"https://github.com/example/repo is exempt from stale repo check\n"
-            f"https://github.com/example/repo2: 30 days inactive\n"
+            f"https://github.com/example/repo2 30 days inactive\n"
             f"Found 1 stale repos in {organization}\n"
         )
         self.assertEqual(expected_output, output)

@@ -386,7 +386,7 @@ def set_repo_data(
  Potentially caused by ghost user."
                 )
 
-    print(f"{repo.html_url}: {days_inactive} days inactive")  # type: ignore
+    print(f"{repo.html_url} {days_inactive} days inactive")  # type: ignore
     return repo_data
 
 
