@@ -97,7 +97,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run stale_repos tool
-        uses: github/stale-repos@v2
+        uses: github/stale-repos@v3
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -161,7 +161,7 @@ jobs:
     steps:
       - name: Run stale_repos tool
         id: stale-repos
-        uses: github/stale-repos@v2
+        uses: github/stale-repos@v3
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -210,7 +210,7 @@ jobs:
         org: [org1, org2]
     steps:
       - name: "run stale-repos"
-        uses: github/stale-repos@v2
+        uses: github/stale-repos@v3
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ matrix.org }}
@@ -240,7 +240,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run stale_repos tool
-        uses: github/stale-repos@v2
+        uses: github/stale-repos@v3
         env:
           GH_APP_ID: ${{ secrets.GH_APP_ID }}
           GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
