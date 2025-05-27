@@ -21,7 +21,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4.2.2
       - name: Run stale_repos tool
-        uses: docker://ghcr.io/github/stale_repos:v1
+        uses: docker://ghcr.io/github/stale_repos:v3
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: github
