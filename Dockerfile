@@ -11,7 +11,7 @@ LABEL com.github.actions.name="stale-repos" \
     org.opencontainers.image.description="Find stale repositories in a GitHub organization."
 
 WORKDIR /action/workspace
-COPY requirements.txt stale_repos.py env.py auth.py /action/workspace/
+COPY requirements.txt *.py /action/workspace/
 
 RUN python3 -m pip install --no-cache-dir -r requirements.txt \
     && apt-get -y update \
