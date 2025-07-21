@@ -31,7 +31,7 @@ All feedback regarding our GitHub Actions, as a whole, should be communicated th
 ## Use as a GitHub Action
 
 1. Create a repository to host this GitHub Action or select an existing repository.
-1. Create the env values from the sample workflow below (`GH_TOKEN`, `ORGANIZATION`, `EXEMPT_TOPICS`) with your information as plain text or repository secrets. More info on creating secrets can be found [here](https://docs.github.com/en/actions/security-guides/encrypted-secrets).
+1. Create the env values from the sample workflow below (`GH_TOKEN`, `ORGANIZATION`, `EXEMPT_TOPICS`) with your information as plain text or repository secrets. More info on [creating secrets] (https://docs.github.com/en/actions/security-guides/encrypted-secrets).
    Note: Your GitHub token will need to have read access to all the repositories in the organization that you want evaluated
 1. Copy the below example workflow to your repository and put it in the `.github/workflows/` directory with the file extension `.yml` (ie. `.github/workflows/stale_repos.yml`)
 
