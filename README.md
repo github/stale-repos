@@ -70,6 +70,7 @@ This action can be configured to authenticate with GitHub App Installation or Pe
 | `ORGANIZATION`       | false    |            | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner                                                                                                                 |
 | `ADDITIONAL_METRICS` | false    |            | Configure additional metrics like days since last release or days since last pull request. This allows for more detailed reporting on repository activity. To include both metrics, set `ADDITIONAL_METRICS: "release,pr"`                                              |
 | `SKIP_EMPTY_REPORTS` | false    | `true`     | Skips report creation when no stale repositories are identified. Setting this input to `false` means reports are always created, even when they contain no results.                                                                                                     |
+| `WORKFLOW_SUMMARY_ENABLED` | false | `false` | When set to `true`, automatically adds the stale repository report to the GitHub Actions workflow summary. This eliminates the need to manually add a step to display the markdown content in the workflow summary.                                                    |
 
 ### Example workflow
 
@@ -123,6 +124,40 @@ jobs:
           assignees: <YOUR_GITHUB_HANDLE_HERE>
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+### Using Workflow Summary
+
+You can automatically include the stale repository report in your GitHub Actions workflow summary by setting `WORKFLOW_SUMMARY_ENABLED: true`. This eliminates the need for additional steps to display the results.
+
+```yaml
+name: stale repo identifier
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "3 2 1 * *"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: stale repo identifier
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run stale_repos tool
+        uses: github/stale-repos@v3
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          ORGANIZATION: ${{ secrets.ORGANIZATION }}
+          EXEMPT_TOPICS: "keep,template"
+          INACTIVE_DAYS: 365
+          ADDITIONAL_METRICS: "release,pr"
+          WORKFLOW_SUMMARY_ENABLED: true
+```
+
+When `WORKFLOW_SUMMARY_ENABLED` is set to `true`, the stale repository report will be automatically added to the GitHub Actions workflow summary, making it easy to see the results directly in the workflow run page.
 
 ### Example stale_repos.md output
 

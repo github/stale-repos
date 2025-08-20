@@ -488,9 +488,13 @@ class WriteToMarkdownWithWorkflowSummaryTestCase(unittest.TestCase):
             )
 
             # Verify regular file was written
-            mock_file.__enter__.return_value.write.assert_called_once_with(expected_content)
-            # Verify summary file was written  
-            mock_summary_file.__enter__.return_value.write.assert_called_once_with(expected_content)
+            mock_file.__enter__.return_value.write.assert_called_once_with(
+                expected_content
+            )
+            # Verify summary file was written
+            mock_summary_file.__enter__.return_value.write.assert_called_once_with(
+                expected_content
+            )
 
     def test_write_to_markdown_with_workflow_summary_disabled(self):
         """Test that when workflow_summary_enabled is False, only the regular file is written."""

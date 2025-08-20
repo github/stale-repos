@@ -73,7 +73,12 @@ def main():  # pragma: no cover
 
     if inactive_repos or not skip_empty_reports:
         output_to_json(inactive_repos)
-        write_to_markdown(inactive_repos, inactive_days_threshold, additional_metrics, workflow_summary_enabled)
+        write_to_markdown(
+            inactive_repos,
+            inactive_days_threshold,
+            additional_metrics,
+            workflow_summary_enabled,
+        )
     else:
         print("Reporting skipped; no stale repos found.")
 
@@ -237,7 +242,11 @@ def get_active_date(repo):
 
 
 def write_to_markdown(
-    inactive_repos, inactive_days_threshold, additional_metrics=None, workflow_summary_enabled=False, file=None
+    inactive_repos,
+    inactive_days_threshold,
+    additional_metrics=None,
+    workflow_summary_enabled=False,
+    file=None,
 ):
     """Write the list of inactive repos to a markdown file.
 
@@ -254,23 +263,29 @@ def write_to_markdown(
     inactive_repos = sorted(
         inactive_repos, key=lambda x: x["days_inactive"], reverse=True
     )
-    
+
     # Generate markdown content
-    content = generate_markdown_content(inactive_repos, inactive_days_threshold, additional_metrics)
-    
+    content = generate_markdown_content(
+        inactive_repos, inactive_days_threshold, additional_metrics
+    )
+
     # Write to file
     with file or open("stale_repos.md", "w", encoding="utf-8") as markdown_file:
         markdown_file.write(content)
     print("Wrote stale repos to stale_repos.md")
-    
+
     # Write to GitHub step summary if enabled
     if workflow_summary_enabled and os.environ.get("GITHUB_STEP_SUMMARY"):
-        with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary_file:
+        with open(
+            os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8"
+        ) as summary_file:
             summary_file.write(content)
         print("Added stale repos to workflow summary")
 
 
-def generate_markdown_content(inactive_repos, inactive_days_threshold, additional_metrics=None):
+def generate_markdown_content(
+    inactive_repos, inactive_days_threshold, additional_metrics=None
+):
     """Generate markdown content for the inactive repos report.
 
     Args:
@@ -289,7 +304,7 @@ def generate_markdown_content(inactive_repos, inactive_days_threshold, additiona
         f"{inactive_days_threshold} days:\n\n"
     )
     content += "| Repository URL | Days Inactive | Last Push Date | Visibility |"
-    
+
     # Include additional metrics columns if configured
     if additional_metrics:
         if "release" in additional_metrics:
@@ -303,7 +318,7 @@ def generate_markdown_content(inactive_repos, inactive_days_threshold, additiona
         if "pr" in additional_metrics:
             content += " --- |"
     content += "\n"
-    
+
     for repo_data in inactive_repos:
         content += (
             f"| {repo_data['url']} "
@@ -317,7 +332,7 @@ def generate_markdown_content(inactive_repos, inactive_days_threshold, additiona
             if "pr" in additional_metrics:
                 content += f" {repo_data['days_since_last_pr']} |"
         content += "\n"
-    
+
     return content
 
 
