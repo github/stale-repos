@@ -462,7 +462,9 @@ class WriteToMarkdownWithWorkflowSummaryTestCase(unittest.TestCase):
 
         with patch("builtins.open", create=True) as mock_open:
             # Configure the mock to return different objects for different files
-            def open_side_effect(filename, mode, **kwargs):
+            def open_side_effect(
+                filename, mode, **_kwargs
+            ):  # pylint: disable=unused-argument
                 if filename == "/tmp/test_summary.md":
                     return mock_summary_file
                 return mock_file
