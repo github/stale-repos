@@ -54,6 +54,7 @@ class TestGetEnvVars(unittest.TestCase):
             gh_token="",
             ghe="",
             skip_empty_reports=True,
+            workflow_summary_enabled=False,
         )
         result = get_env_vars(True)
         self.assertEqual(str(result), str(expected_result))
@@ -79,6 +80,7 @@ class TestGetEnvVars(unittest.TestCase):
             gh_token=TOKEN,
             ghe="",
             skip_empty_reports=True,
+            workflow_summary_enabled=False,
         )
         result = get_env_vars(True)
         self.assertEqual(str(result), str(expected_result))
@@ -119,6 +121,7 @@ class TestGetEnvVars(unittest.TestCase):
             gh_token=TOKEN,
             ghe="",
             skip_empty_reports=False,
+            workflow_summary_enabled=False,
         )
         result = get_env_vars(True)
         self.assertEqual(str(result), str(expected_result))
@@ -143,6 +146,7 @@ class TestGetEnvVars(unittest.TestCase):
             gh_token="TOKEN",
             ghe=None,
             skip_empty_reports=True,
+            workflow_summary_enabled=False,
         )
         result = get_env_vars(True)
         self.assertEqual(str(result), str(expected_result))
@@ -167,6 +171,29 @@ class TestGetEnvVars(unittest.TestCase):
             str(the_exception),
             "GH_APP_ID set and GH_APP_INSTALLATION_ID or GH_APP_PRIVATE_KEY variable not set",
         )
+
+    @patch.dict(
+        os.environ,
+        {
+            "GH_TOKEN": "TOKEN",
+            "WORKFLOW_SUMMARY_ENABLED": "true",
+        },
+        clear=True,
+    )
+    def test_get_env_vars_with_workflow_summary_enabled(self):
+        """Test that workflow_summary_enabled is set to True when environment variable is true"""
+        expected_result = EnvVars(
+            gh_app_id=None,
+            gh_app_installation_id=None,
+            gh_app_private_key_bytes=b"",
+            gh_app_enterprise_only=False,
+            gh_token="TOKEN",
+            ghe=None,
+            skip_empty_reports=True,
+            workflow_summary_enabled=True,
+        )
+        result = get_env_vars(True)
+        self.assertEqual(str(result), str(expected_result))
 
 
 if __name__ == "__main__":
