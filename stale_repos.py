@@ -9,9 +9,9 @@ from datetime import datetime, timezone
 import github3
 from dateutil.parser import parse
 from env import get_env_vars
-from markdown import write_to_markdown
 
 import auth
+from markdown import write_to_markdown
 
 
 def main():  # pragma: no cover
