@@ -60,16 +60,17 @@ This action can be configured to authenticate with GitHub App Installation or Pe
 
 #### Other Configuration Options
 
-| field                | required | default    | description                                                                                                                                                                                                                                                             |
-| -------------------- | -------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `ACTIVITY_METHOD`    | false    | `"pushed"` | How to get the last active date of the repository. Defaults to `pushed`, which is the last time any branch had a push. Can also be set to `default_branch_updated` to instead measure from the latest commit on the default branch (good for filtering out dependabot ) |
-| `GH_ENTERPRISE_URL`  | false    | `""`       | URL of GitHub Enterprise instance to use for auth instead of github.com                                                                                                                                                                                                 |
-| `INACTIVE_DAYS`      | true     |            | The number of days used to determine if repository is stale, based on `push` events                                                                                                                                                                                     |
-| `EXEMPT_REPOS`       | false    |            | Comma separated list of repositories to exempt from being flagged as stale. Supports Unix shell-style wildcards. ie. `EXEMPT_REPOS = "stale-repos,test-repo,conf-*"`                                                                                                    |
-| `EXEMPT_TOPICS`      | false    |            | Comma separated list of topics to exempt from being flagged as stale                                                                                                                                                                                                    |
-| `ORGANIZATION`       | false    |            | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner                                                                                                                 |
-| `ADDITIONAL_METRICS` | false    |            | Configure additional metrics like days since last release or days since last pull request. This allows for more detailed reporting on repository activity. To include both metrics, set `ADDITIONAL_METRICS: "release,pr"`                                              |
-| `SKIP_EMPTY_REPORTS` | false    | `true`     | Skips report creation when no stale repositories are identified. Setting this input to `false` means reports are always created, even when they contain no results.                                                                                                     |
+| field                      | required | default    | description                                                                                                                                                                                                                                                             |
+| -------------------------- | -------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ACTIVITY_METHOD`          | false    | `"pushed"` | How to get the last active date of the repository. Defaults to `pushed`, which is the last time any branch had a push. Can also be set to `default_branch_updated` to instead measure from the latest commit on the default branch (good for filtering out dependabot ) |
+| `GH_ENTERPRISE_URL`        | false    | `""`       | URL of GitHub Enterprise instance to use for auth instead of github.com                                                                                                                                                                                                 |
+| `INACTIVE_DAYS`            | true     |            | The number of days used to determine if repository is stale, based on `push` events                                                                                                                                                                                     |
+| `EXEMPT_REPOS`             | false    |            | Comma separated list of repositories to exempt from being flagged as stale. Supports Unix shell-style wildcards. ie. `EXEMPT_REPOS = "stale-repos,test-repo,conf-*"`                                                                                                    |
+| `EXEMPT_TOPICS`            | false    |            | Comma separated list of topics to exempt from being flagged as stale                                                                                                                                                                                                    |
+| `ORGANIZATION`             | false    |            | The organization to scan for stale repositories. If no organization is provided, this tool will search through repositories owned by the GH_TOKEN owner                                                                                                                 |
+| `ADDITIONAL_METRICS`       | false    |            | Configure additional metrics like days since last release or days since last pull request. This allows for more detailed reporting on repository activity. To include both metrics, set `ADDITIONAL_METRICS: "release,pr"`                                              |
+| `SKIP_EMPTY_REPORTS`       | false    | `true`     | Skips report creation when no stale repositories are identified. Setting this input to `false` means reports are always created, even when they contain no results.                                                                                                     |
+| `WORKFLOW_SUMMARY_ENABLED` | false    | `false`    | When set to `true`, automatically adds the stale repository report to the GitHub Actions workflow summary. This eliminates the need to manually add a step to display the Markdown content in the workflow summary.                                                     |
 
 ### Example workflow
 
@@ -123,6 +124,40 @@ jobs:
           assignees: <YOUR_GITHUB_HANDLE_HERE>
           token: ${{ secrets.GITHUB_TOKEN }}
 ```
+
+### Using Workflow Summary
+
+You can automatically include the stale repository report in your GitHub Actions workflow summary by setting `WORKFLOW_SUMMARY_ENABLED: true`. This eliminates the need for additional steps to display the results.
+
+```yaml
+name: stale repo identifier
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "3 2 1 * *"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: stale repo identifier
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Run stale_repos tool
+        uses: github/stale-repos@v3
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+          ORGANIZATION: ${{ secrets.ORGANIZATION }}
+          EXEMPT_TOPICS: "keep,template"
+          INACTIVE_DAYS: 365
+          ADDITIONAL_METRICS: "release,pr"
+          WORKFLOW_SUMMARY_ENABLED: true
+```
+
+When `WORKFLOW_SUMMARY_ENABLED` is set to `true`, the stale repository report will be automatically added to the GitHub Actions workflow summary, making it easy to see the results directly in the workflow run page.
 
 ### Example stale_repos.md output
 

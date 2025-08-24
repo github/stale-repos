@@ -11,6 +11,7 @@ from dateutil.parser import parse
 from env import get_env_vars
 
 import auth
+from markdown import write_to_markdown
 
 
 def main():  # pragma: no cover
@@ -38,6 +39,7 @@ def main():  # pragma: no cover
     ghe = env_vars.ghe
     gh_app_enterprise_only = env_vars.gh_app_enterprise_only
     skip_empty_reports = env_vars.skip_empty_reports
+    workflow_summary_enabled = env_vars.workflow_summary_enabled
 
     # Auth to GitHub.com or GHE
     github_connection = auth.auth_to_github(
@@ -72,7 +74,12 @@ def main():  # pragma: no cover
 
     if inactive_repos or not skip_empty_reports:
         output_to_json(inactive_repos)
-        write_to_markdown(inactive_repos, inactive_days_threshold, additional_metrics)
+        write_to_markdown(
+            inactive_repos,
+            inactive_days_threshold,
+            additional_metrics,
+            workflow_summary_enabled,
+        )
     else:
         print("Reporting skipped; no stale repos found.")
 
@@ -233,61 +240,6 @@ def get_active_date(repo):
         )
         return None
     return active_date
-
-
-def write_to_markdown(
-    inactive_repos, inactive_days_threshold, additional_metrics=None, file=None
-):
-    """Write the list of inactive repos to a markdown file.
-
-    Args:
-        inactive_repos: A list of dictionaries containing the repo, days inactive,
-            the date of the last push, repository visibility (public/private),
-            days since the last release, and days since the last pr
-        inactive_days_threshold: The threshold (in days) for considering a repo as inactive.
-        additional_metrics: A list of additional metrics to include in the report.
-        file: A file object to write to. If None, a new file will be created.
-
-    """
-    inactive_repos = sorted(
-        inactive_repos, key=lambda x: x["days_inactive"], reverse=True
-    )
-    with file or open("stale_repos.md", "w", encoding="utf-8") as markdown_file:
-        markdown_file.write("# Inactive Repositories\n\n")
-        markdown_file.write(
-            f"The following repos have not had a push event for more than "
-            f"{inactive_days_threshold} days:\n\n"
-        )
-        markdown_file.write(
-            "| Repository URL | Days Inactive | Last Push Date | Visibility |"
-        )
-        # Include additional metrics columns if configured
-        if additional_metrics:
-            if "release" in additional_metrics:
-                markdown_file.write(" Days Since Last Release |")
-            if "pr" in additional_metrics:
-                markdown_file.write(" Days Since Last PR |")
-        markdown_file.write("\n| --- | --- | --- | --- |")
-        if additional_metrics:
-            if "release" in additional_metrics:
-                markdown_file.write(" --- |")
-            if "pr" in additional_metrics:
-                markdown_file.write(" --- |")
-        markdown_file.write("\n")
-        for repo_data in inactive_repos:
-            markdown_file.write(
-                f"| {repo_data['url']} \
-| {repo_data['days_inactive']} \
-| {repo_data['last_push_date']} \
-| {repo_data['visibility']} |"
-            )
-            if additional_metrics:
-                if "release" in additional_metrics:
-                    markdown_file.write(f" {repo_data['days_since_last_release']} |")
-                if "pr" in additional_metrics:
-                    markdown_file.write(f" {repo_data['days_since_last_pr']} |")
-            markdown_file.write("\n")
-    print("Wrote stale repos to stale_repos.md")
 
 
 def output_to_json(inactive_repos, file=None):
