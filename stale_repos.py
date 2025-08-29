@@ -187,10 +187,10 @@ def get_days_since_last_release(repo):
     try:
         last_release = next(repo.releases())
         return (datetime.now(timezone.utc) - last_release.created_at).days
-    except TypeError as e:
+    except TypeError:
         print(
-            f"{repo.html_url} had an exception trying to get the activity date.\
-        Potentially caused by ghost user."
+            f"{repo.html_url} had an exception trying to get the last release.\
+            Potentially caused by ghost user."
         )
         return None
     except StopIteration:
