@@ -28,6 +28,8 @@ class EnvVars:
         ghe (str): The GitHub Enterprise URL to use for authentication
         skip_empty_reports (bool): If true, Skips report creation when no stale
             repositories are identified
+        workflow_summary_enabled (bool): If true, adds the markdown report to GitHub
+            Actions workflow summary
     """
 
     def __init__(
@@ -39,6 +41,7 @@ class EnvVars:
         gh_token: str | None,
         ghe: str | None,
         skip_empty_reports: bool,
+        workflow_summary_enabled: bool,
     ):
         self.gh_app_id = gh_app_id
         self.gh_app_installation_id = gh_app_installation_id
@@ -47,6 +50,7 @@ class EnvVars:
         self.gh_token = gh_token
         self.ghe = ghe
         self.skip_empty_reports = skip_empty_reports
+        self.workflow_summary_enabled = workflow_summary_enabled
 
     def __repr__(self):
         return (
@@ -58,6 +62,7 @@ class EnvVars:
             f"{self.gh_token},"
             f"{self.ghe},"
             f"{self.skip_empty_reports},"
+            f"{self.workflow_summary_enabled},"
         )
 
 
@@ -120,6 +125,7 @@ def get_env_vars(
     ghe = os.getenv("GH_ENTERPRISE_URL")
     gh_app_enterprise_only = get_bool_env_var("GITHUB_APP_ENTERPRISE_ONLY")
     skip_empty_reports = get_bool_env_var("SKIP_EMPTY_REPORTS", True)
+    workflow_summary_enabled = get_bool_env_var("WORKFLOW_SUMMARY_ENABLED")
 
     if gh_app_id and (not gh_app_private_key_bytes or not gh_app_installation_id):
         raise ValueError(
@@ -142,4 +148,5 @@ def get_env_vars(
         gh_token,
         ghe,
         skip_empty_reports,
+        workflow_summary_enabled,
     )

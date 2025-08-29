@@ -31,7 +31,6 @@ from stale_repos import (
     get_inactive_repos,
     is_repo_exempt,
     output_to_json,
-    write_to_markdown,
 )
 
 
@@ -352,88 +351,6 @@ class GetInactiveReposTestCase(unittest.TestCase):
             }
         ]
         assert inactive_repos == expected_inactive_repos
-
-
-class WriteToMarkdownTestCase(unittest.TestCase):
-    """
-    Unit test case for the write_to_markdown() function.
-    """
-
-    def test_write_to_markdown(self):
-        """Test that the write_to_markdown function writes the expected data to a file.
-
-        This test creates a list of inactive repos and a mock file object using MagicMock.
-        It then calls the write_to_markdown function with the list of inactive repos and
-        the mock file object. Finally, it uses the assert_has_calls method to check that
-        the mock file object was called with the expected data.
-
-        """
-        forty_days_ago = datetime.now(timezone.utc) - timedelta(days=40)
-        thirty_days_ago = datetime.now(timezone.utc) - timedelta(days=30)
-        # Create an unsorted list of inactive repos
-        inactive_repos = [
-            {
-                "url": "https://github.com/example/repo1",
-                "days_inactive": 30,
-                "last_push_date": thirty_days_ago.date().isoformat(),
-                "visibility": "private",
-                "days_since_last_release": None,
-                "days_since_last_pr": None,
-            },
-            {
-                "url": "https://github.com/example/repo2",
-                "days_inactive": 40,
-                "last_push_date": forty_days_ago.date().isoformat(),
-                "visibility": "public",
-                "days_since_last_release": None,
-                "days_since_last_pr": None,
-            },
-        ]
-
-        inactive_days_threshold = 365
-
-        # Create a mock file object
-        mock_file = MagicMock()
-
-        # Call the write_to_markdown function with the mock file object
-        write_to_markdown(
-            inactive_repos,
-            inactive_days_threshold,
-            additional_metrics=["release", "pr"],
-            file=mock_file,
-        )
-
-        # Check that the mock file object was called with the expected data
-        expected_calls = [
-            call.write("# Inactive Repositories\n\n"),
-            call.write(
-                "The following repos have not had a push event for more than 365 days:\n\n"
-            ),
-            call.write(
-                "| Repository URL | Days Inactive | Last Push Date | Visibility |"
-            ),
-            call.write(" Days Since Last Release |"),
-            call.write(" Days Since Last PR |"),
-            call.write("\n| --- | --- | --- | --- |"),
-            call.write(" --- |"),
-            call.write(" --- |"),
-            call.write("\n"),
-            call.write(
-                f"| https://github.com/example/repo2 | 40 |\
- {forty_days_ago.date().isoformat()} | public |"
-            ),
-            call.write(" None |"),
-            call.write(" None |"),
-            call.write("\n"),
-            call.write(
-                f"| https://github.com/example/repo1 | 30 |\
- {thirty_days_ago.date().isoformat()} | private |"
-            ),
-            call.write(" None |"),
-            call.write(" None |"),
-            call.write("\n"),
-        ]
-        mock_file.__enter__.return_value.assert_has_calls(expected_calls)
 
 
 @patch.dict(os.environ, {"ACTIVITY_METHOD": "default_branch_updated"})
