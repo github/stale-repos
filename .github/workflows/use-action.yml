@@ -20,6 +20,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v5.0.0
+        with:
+          persist-credentials: false
       - name: Run stale_repos tool
         uses: docker://ghcr.io/github/stale_repos:v3
         env:

@@ -21,6 +21,7 @@ jobs:
         with:
           fetch-tags: true
           ref: ${{ github.event.inputs.TAG_NAME || github.ref }}
+          persist-credentials: false
       - name: version
         id: version
         run: |
@@ -30,5 +31,8 @@ jobs:
           { echo "tag=${tag}"; echo "version=${version}"; echo "major=${major}"; } >> "$GITHUB_OUTPUT"
       - name: force update major tag
         run: |
-          git tag -f v${{ steps.version.outputs.major }} ${{ steps.version.outputs.tag }}
-          git push -f origin v${{ steps.version.outputs.major }}
+          git tag -f v${STEPS_VERSION_OUTPUTS_MAJOR} ${STEPS_VERSION_OUTPUTS_TAG}
+          git push -f origin v${STEPS_VERSION_OUTPUTS_MAJOR}
+        env:
+          STEPS_VERSION_OUTPUTS_MAJOR: ${{ steps.version.outputs.major }}
+          STEPS_VERSION_OUTPUTS_TAG: ${{ steps.version.outputs.tag }}
