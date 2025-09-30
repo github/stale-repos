@@ -98,7 +98,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run stale_repos tool
-        uses: github/stale-repos@v3
+        uses: github/stale-repos@v6
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -147,7 +147,7 @@ jobs:
 
     steps:
       - name: Run stale_repos tool
-        uses: github/stale-repos@v3
+        uses: github/stale-repos@v6
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -275,7 +275,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run stale_repos tool
-        uses: github/stale-repos@v3
+        uses: github/stale-repos@v6
         env:
           GH_APP_ID: ${{ secrets.GH_APP_ID }}
           GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
