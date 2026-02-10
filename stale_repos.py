@@ -188,10 +188,8 @@ def get_days_since_last_release(repo):
         last_release = next(repo.releases())
         return (datetime.now(timezone.utc) - last_release.created_at).days
     except TypeError:
-        print(
-            f"{repo.html_url} had an exception trying to get the last release.\
-            Potentially caused by ghost user."
-        )
+        print(f"{repo.html_url} had an exception trying to get the last release.\
+            Potentially caused by ghost user.")
         return None
     except StopIteration:
         return None
@@ -233,17 +231,13 @@ def get_active_date(repo):
                 return None
             active_date = parse(last_push_str)
         else:
-            raise ValueError(
-                f"""
+            raise ValueError(f"""
                 ACTIVITY_METHOD environment variable has unsupported value: '{activity_method}'.
                 Allowed values are: 'pushed' and 'default_branch_updated'
-                """
-            )
+                """)
     except github3.exceptions.GitHubException:
-        print(
-            f"{repo.html_url} had an exception trying to get the activity date.\
- Potentially caused by ghost user."
-        )
+        print(f"{repo.html_url} had an exception trying to get the activity date.\
+ Potentially caused by ghost user.")
         return None
     return active_date
 
@@ -254,7 +248,7 @@ def output_to_json(inactive_repos, file=None):
     Args:
         inactive_repos: A list of dictionaries containing the repo,
             days inactive, the date of the last push,
-            visiblity of the repository (public/private),
+            visibility of the repository (public/private),
             days since the last release, and days since the last pr.
 
     Returns:
@@ -339,10 +333,8 @@ def set_repo_data(
             try:
                 repo_data["days_since_last_pr"] = get_days_since_last_pr(repo)
             except github3.exceptions.GitHubException:
-                print(
-                    f"{repo.html_url} had an exception trying to get the last PR.\
- Potentially caused by ghost user."
-                )
+                print(f"{repo.html_url} had an exception trying to get the last PR.\
+ Potentially caused by ghost user.")
 
     print(f"{repo.html_url} {days_inactive} days inactive")  # type: ignore
     return repo_data
