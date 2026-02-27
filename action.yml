@@ -7,7 +7,7 @@ outputs:
     description: "Inactive Repos in the organization"
 runs:
   using: "docker"
-  image: "docker://ghcr.io/github/stale_repos:v6"
+  image: "docker://ghcr.io/github-community-projects/stale_repos:v7"
 branding:
   icon: "check-square"
   color: "white"

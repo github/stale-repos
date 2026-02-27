@@ -1,10 +1,20 @@
 # Stale Repos Action
 
-[![Lint Code Base](https://github.com/github/stale-repos/actions/workflows/linter.yaml/badge.svg)](https://github.com/github/stale-repos/actions/workflows/linter.yaml)
-[![CodeQL](https://github.com/github/stale-repos/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/github/stale-repos/actions/workflows/github-code-scanning/codeql)
-[![Docker Image CI](https://github.com/github/stale-repos/actions/workflows/docker-image.yml/badge.svg)](https://github.com/github/stale-repos/actions/workflows/docker-image.yml)
-[![Python CI](https://github.com/github/stale-repos/actions/workflows/python-package.yml/badge.svg)](https://github.com/github/stale-repos/actions/workflows/python-package.yml)
-[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/github/stale-repos/badge)](https://scorecard.dev/viewer/?uri=github.com/github/stale-repos)
+> [!IMPORTANT]
+> This repository has moved from `github/stale-repos` to `github-community-projects/stale-repos`.
+> Please update your git remote:
+>
+> ```shell
+> git remote set-url origin git@github.com:github-community-projects/stale-repos.git
+> ```
+>
+> Note: replace `origin` with the name of your remote if it's different.
+
+[![Lint Code Base](https://github.com/github-community-projects/stale-repos/actions/workflows/linter.yaml/badge.svg)](https://github.com/github-community-projects/stale-repos/actions/workflows/linter.yaml)
+[![CodeQL](https://github.com/github-community-projects/stale-repos/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/github-community-projects/stale-repos/actions/workflows/github-code-scanning/codeql)
+[![Docker Image CI](https://github.com/github-community-projects/stale-repos/actions/workflows/docker-image.yml/badge.svg)](https://github.com/github-community-projects/stale-repos/actions/workflows/docker-image.yml)
+[![Python CI](https://github.com/github-community-projects/stale-repos/actions/workflows/python-package.yml/badge.svg)](https://github.com/github-community-projects/stale-repos/actions/workflows/python-package.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/github-community-projects/stale-repos/badge)](https://scorecard.dev/viewer/?uri=github.com/github-community-projects/stale-repos)
 
 (Used by the `github` organization!)
 
@@ -20,7 +30,7 @@ If you are looking to identify stale pull requests and issues, check out [action
 
 ## Support
 
-If you need support using this project or have questions about it, please [open up an issue in this repository](https://github.com/github/stale-repos/issues).
+If you need support using this project or have questions about it, please [open up an issue in this repository](https://github.com/github-community-projects/stale-repos/issues).
 Requests made directly to GitHub staff or support team will be redirected here to open an issue.
 GitHub SLA's and support/services contracts do not apply to this repository.
 
@@ -98,7 +108,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run stale_repos tool
-        uses: github/stale-repos@v6
+        uses: github-community-projects/stale-repos@v7
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -147,7 +157,7 @@ jobs:
 
     steps:
       - name: Run stale_repos tool
-        uses: github/stale-repos@v6
+        uses: github-community-projects/stale-repos@v7
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -196,7 +206,7 @@ jobs:
     steps:
       - name: Run stale_repos tool
         id: stale-repos
-        uses: github/stale-repos@v3
+        uses: github-community-projects/stale-repos@v7
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -245,7 +255,7 @@ jobs:
         org: [org1, org2]
     steps:
       - name: "run stale-repos"
-        uses: github/stale-repos@v3
+        uses: github-community-projects/stale-repos@v7
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ matrix.org }}
@@ -275,7 +285,7 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Run stale_repos tool
-        uses: github/stale-repos@v6
+        uses: github-community-projects/stale-repos@v7
         env:
           GH_APP_ID: ${{ secrets.GH_APP_ID }}
           GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
