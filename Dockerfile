@@ -7,9 +7,9 @@ LABEL com.github.actions.name="stale-repos" \
     com.github.actions.icon="check-square" \
     com.github.actions.color="white" \
     maintainer="@zkoppert" \
-    org.opencontainers.image.url="https://github.com/github/stale-repos" \
-    org.opencontainers.image.source="https://github.com/github/stale-repos" \
-    org.opencontainers.image.documentation="https://github.com/github/stale-repos" \
+    org.opencontainers.image.url="https://github.com/github-community-projects/stale-repos" \
+    org.opencontainers.image.source="https://github.com/github-community-projects/stale-repos" \
+    org.opencontainers.image.documentation="https://github.com/github-community-projects/stale-repos" \
     org.opencontainers.image.vendor="GitHub" \
     org.opencontainers.image.description="Find stale repositories in a GitHub organization."
 
