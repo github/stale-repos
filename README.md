@@ -105,10 +105,12 @@ jobs:
       issues: write
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Run stale_repos tool
-        uses: github-community-projects/stale-repos@v7
+        uses: github-community-projects/stale-repos@v9
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -126,7 +128,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create issue
-        uses: peter-evans/create-issue-from-file@v5
+        uses: peter-evans/create-issue-from-file@v6
         with:
           issue-number: ${{ env.issue_number }}
           title: Stale-repository-report
@@ -157,7 +159,7 @@ jobs:
 
     steps:
       - name: Run stale_repos tool
-        uses: github-community-projects/stale-repos@v7
+        uses: github-community-projects/stale-repos@v9
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -206,7 +208,7 @@ jobs:
     steps:
       - name: Run stale_repos tool
         id: stale-repos
-        uses: github-community-projects/stale-repos@v7
+        uses: github-community-projects/stale-repos@v9
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ secrets.ORGANIZATION }}
@@ -216,7 +218,7 @@ jobs:
 
       - name: Print output of stale_repos tool
         run: echo "${{ steps.stale-repos.outputs.inactiveRepos }}"
-      - uses: actions/github-script@v6
+      - uses: actions/github-script@v8
         with:
           script: |
             const repos = ${{ steps.stale-repos.outputs.inactiveRepos }}
@@ -255,7 +257,7 @@ jobs:
         org: [org1, org2]
     steps:
       - name: "run stale-repos"
-        uses: github-community-projects/stale-repos@v7
+        uses: github-community-projects/stale-repos@v9
         env:
           GH_TOKEN: ${{ secrets.GH_TOKEN }}
           ORGANIZATION: ${{ matrix.org }}
@@ -282,10 +284,12 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
 
       - name: Run stale_repos tool
-        uses: github-community-projects/stale-repos@v7
+        uses: github-community-projects/stale-repos@v9
         env:
           GH_APP_ID: ${{ secrets.GH_APP_ID }}
           GH_APP_INSTALLATION_ID: ${{ secrets.GH_APP_INSTALLATION_ID }}
